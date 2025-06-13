@@ -1,0 +1,8 @@
+django
+django-unfold
+djangorestframework
+django-cors-headers
+pytelegrambotapi
+psycopg2
+pytz
+requests
