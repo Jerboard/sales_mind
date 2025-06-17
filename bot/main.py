@@ -20,7 +20,7 @@ dp = Dispatcher()
 
 
 async def main() -> None:
-    await init_models()
+    # await init_models()
     await set_main_menu()
 
     dp.include_router(main_router)
