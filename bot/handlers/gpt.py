@@ -112,6 +112,7 @@ async def gpt_rate(cb: CallbackQuery, state: FSMContext):
         await cb.message.edit_text(
             text=text,
             entities=cb.message.entities,
+            parse_mode=None,
             reply_markup=kb.get_new_query_kb(msg_id)
         )
     except:

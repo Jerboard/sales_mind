@@ -65,7 +65,13 @@ class Prompt(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
     category = models.ForeignKey(PromptCategory, on_delete=models.CASCADE, db_column="category_id", verbose_name="Категория")
     name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Название")
-    model = models.CharField(max_length=255, null=True, blank=True, verbose_name="Модель")
+    model = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Модель",
+        help_text='gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-4.1, gpt-4.1-mini, o3-pro, o3, o4-mini, gpt-3.5-turbo-0125'
+    )
     hint = models.TextField(null=True, blank=True, verbose_name="Подсказка")
     role = models.TextField(null=True, blank=True, verbose_name="Роль")
     prompt = models.TextField(null=True, blank=True, verbose_name="Промпт")
