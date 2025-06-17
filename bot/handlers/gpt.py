@@ -3,6 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 from aiogram.enums.parse_mode import ParseMode
 
+import re
+
 import keyboards as kb
 import utils as ut
 import db
@@ -97,13 +99,19 @@ async def gpt_rate(cb: CallbackQuery, state: FSMContext):
 
     answer_rate = '👍' if rate else '👎'
 
+    text = cb.message.text
+    # 1. Срезаем старую оценку (если она была) вместе с лишними \n
+    #    – убираем:   «\n\n👍»  или  «\n\n👎»  или просто «👍/👎» на самом хвосте
+    text = re.sub(r'(?:\n*\s*\n)?[👍👎]$', '', text).rstrip()
+
+    # 2. Приписываем свежую
+    text = f'{text}\n\n{answer_rate}'
     await db.Message.update(message_id=msg_id, is_like=rate)
     await cb.answer('Оценка поставлена')
     try:
         await cb.message.edit_text(
-            text=f'{cb.message.text}\n\n{answer_rate}',
+            text=text,
             entities=cb.message.entities,
-            # parse_mode=ParseMode.MARKDOWN.value,
             reply_markup=kb.get_new_query_kb(msg_id)
         )
     except:

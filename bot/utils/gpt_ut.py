@@ -16,7 +16,7 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
     try:
         time_start = datetime.now()
         format_prompt = (
-            'Форматируй текст строго HTML-тегами Telegram Bot API: <b> (жирный);'
+            'При ответе форматируй текст. Для форматирования используй строго HTML-теги Telegram Bot API: <b> (жирный);'
             ' <i> (курсив); <u> (подчёркнутый); <s> (зачёркнутый); '
             '<code> (монострочный); <pre> (блок кода); <a href="URL">…</a> (ссылка); '
             '<span class="tg-spoiler">…</span> (спойлер). '
