@@ -8,8 +8,12 @@ class Config:
 
     if debug:
         token = os.getenv("TOKEN_TEST")
+        pay_key = os.getenv("PAY_KEY_TEST")
+        wallet_id = os.getenv("WALLET_ID_TEST")
     else:
         token = os.getenv("TOKEN")
+        pay_key = os.getenv("PAY_KEY_TEST")
+        wallet_id = os.getenv("WALLET_ID_TEST")
 
     db_host = os.getenv('DB_HOST')
     db_port = os.getenv('DB_PORT')

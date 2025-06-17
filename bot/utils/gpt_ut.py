@@ -25,8 +25,8 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
         messages = [
             ChatCompletionSystemMessageParam(
                 role='system',
-                content=f'{format_prompt}\n\n{prompt.role}\n\n{prompt.prompt}'
-                # content=f'{prompt.role}\n\n{prompt.prompt}\n\nОтвечай использую разметку html для телеграм, не забывай про емодзи'
+                content=f'{prompt.role}\n\n{prompt.prompt}'
+                # content=f'{format_prompt}\n\n{prompt.role}\n\n{prompt.prompt}'
             )]
 
         # добавляем историю
