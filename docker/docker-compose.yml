@@ -1,12 +1,13 @@
 
 services:
   db:
-    image: postgres:latest
+#    image: postgres:latest
+    image: pgvector/pgvector:pg16
     container_name: db_sales_mind
     volumes:
       - ../data:/var/lib/postgresql/data
+      - ./pg-init:/docker/dockerfiles/pg-init.d      # CREATE EXTENSION pgvector;
     restart: unless-stopped
-
     env_file:
       - .env
 

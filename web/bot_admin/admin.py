@@ -2,7 +2,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
-from .models import User, LogsError, PromptCategory, Prompt
+from .models import User, LogsError, PromptCategory, Prompt, Message
 
 
 # ────────── inlines ──────────
@@ -25,9 +25,9 @@ class UserAdmin(ModelAdmin):
 
 @admin.register(LogsError)
 class LogsErrorAdmin(ModelAdmin):
-    list_display = ("id", "message", "created_at")
+    list_display = ("created_at", "message", "traceback")
     # list_filter = ("user",)
-    search_fields = ("message", "traceback")
+    search_fields = ("message",)
     readonly_fields = ("traceback", "created_at", "updated_at")
     date_hierarchy = "created_at"
     ordering = ("-created_at",)
@@ -35,21 +35,31 @@ class LogsErrorAdmin(ModelAdmin):
 
 @admin.register(PromptCategory)
 class PromptCategoryAdmin(ModelAdmin):
-    list_display = ("id", "name", "is_active", "updated_at")
+    list_display = ("name", "is_active", "created_at", "updated_at")
     list_editable = ("is_active",)
     search_fields = ("name",)
     list_filter = ("is_active",)
     ordering = ("name",)
-    inlines = (PromptInline,)          # вкладываем промпты прямо в категорию
+    inlines = (PromptInline,)
     readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(Prompt)
 class PromptAdmin(ModelAdmin):
-    list_display = ("id", "name", "category", "model", "is_active", "updated_at")
+    list_display = ("name", "category", "model", 'role', 'prompt', "is_active", "updated_at")
     list_editable = ("is_active",)
     list_filter = ("is_active", "model", "category")
     search_fields = ("name", "hint", "role", "prompt")
     ordering = ("-updated_at",)
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(Message)
+class MessageAdmin(ModelAdmin):
+    list_display = ("user", "created_at", "time_answer", "prompt_tokens", "completion_tokens", "is_like")
+    list_filter = ("prompt", "user", "is_like", "created_at")
+    search_fields = ("request", "response")
+    readonly_fields = ("created_at", "updated_at")
+    date_hierarchy = "created_at"
+    ordering = ("-created_at",)
 

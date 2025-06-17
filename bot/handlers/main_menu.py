@@ -7,7 +7,7 @@ import utils as ut
 import db
 from settings import conf, log_error
 from init import main_router, bot
-from enums import CB, MenuCommand
+from enums import CB, MenuCommand, Action
 
 
 @main_router.message(CommandStart())
@@ -39,5 +39,10 @@ async def gpt_start_msg(msg: Message, state: FSMContext):
 
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_START.value))
 async def gpt_start_cb(cb: CallbackQuery, state: FSMContext):
-    await ut.gpt_start(cb.from_user.id, msg_id=cb.message.message_id)
+    _, action = cb.data.split(':')
+
+    if action == Action.EDIT.value:
+        await ut.gpt_start(cb.from_user.id, msg_id=cb.message.message_id)
+    else:
+        await ut.gpt_start(cb.from_user.id)
 

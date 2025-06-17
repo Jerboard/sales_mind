@@ -2,6 +2,7 @@ from aiogram.types import ErrorEvent, Message, CallbackQuery
 
 from init import error_router
 from settings import log_error, conf
+import utils as ut
 from db import LogsError
 
 
@@ -17,6 +18,10 @@ if not conf.debug:
 @error_router.message()
 async def free_msg_hnd(msg: Message):
     print(f'free_msg_hnd:\n{msg.content_type}\n{msg.text}')
+
+    await msg.answer('🤷‍♂️ Не понял твоего вопроса, выбери сначала контекст')
+    await ut.gpt_start(user_id=msg.from_user.id)
+
 
 
 # проверяет подписку, в случае удачи пропускает

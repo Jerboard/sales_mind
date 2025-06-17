@@ -17,4 +17,6 @@ class Action(Enum):
     DEL = 'del'
     CONFIRM = 'confirm'
     BACK = 'back'
+    NEW = 'new'
+    EDIT = 'edit'
 

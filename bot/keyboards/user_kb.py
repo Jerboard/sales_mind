@@ -17,7 +17,7 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO.value}')
     kb.button(text='💳 Оплата', callback_data=f'{CB.PAYMENT_START.value}')
-    kb.button(text='💻 Отправить запрос', callback_data=f'{CB.GPT_START.value}')
+    kb.button(text='💻 Отправить запрос', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
 
     return kb.adjust(1).as_markup()
 
@@ -36,16 +36,18 @@ def get_prompt_kb(prompts: list[db.Prompt]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     for prompt in prompts:
         kb.button(text=prompt.name, callback_data=f'{CB.GPT_PROMPT.value}:{prompt.id}')
-    kb.button(text='🔙 Назад', callback_data=f'{CB.GPT_START.value}')
+    kb.button(text='🔙 Назад', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
     return kb.adjust(1).as_markup()
 
 
 # Кнопки подписаться на канал
-def get_new_query_kb() -> InlineKeyboardMarkup:
+def get_new_query_kb(message_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text='💻 Отправить новый запрос', callback_data=f'{CB.GPT_START.value}')
+    kb.button(text='👍', callback_data=f'{CB.GPT_RATE.value}:{message_id}:1')
+    kb.button(text='👎', callback_data=f'{CB.GPT_RATE.value}:{message_id}:0')
+    kb.button(text='💻 Выбрать другой сценарий', callback_data=f'{CB.GPT_START.value}:{Action.NEW.value}')
 
-    return kb.adjust(1).as_markup()
+    return kb.adjust(2, 1).as_markup()
 
 '''
 🧠 Что я умею
