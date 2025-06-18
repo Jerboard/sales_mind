@@ -87,8 +87,12 @@ async def gpt_prompt_msg(msg: Message, state: FSMContext):
         completion_tokens=usage.get('completion_tokens', 0),
         time_answer=usage.get('time_answer'),
     )
+    try:
+        await sent.edit_text(text=gpt_answer, reply_markup=kb.get_new_query_kb(message_id))
+    except Exception as e:
+        log_error(e)
+        await sent.edit_text(text=gpt_answer, parse_mode=None, reply_markup=kb.get_new_query_kb(message_id))
 
-    await sent.edit_text(text=gpt_answer, reply_markup=kb.get_new_query_kb(message_id))
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_RATE.value))

@@ -16,17 +16,24 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
     try:
         time_start = datetime.now()
         format_prompt = (
-            'При ответе форматируй текст. Для форматирования используй строго HTML-теги Telegram Bot API: <b> (жирный);'
-            ' <i> (курсив); <u> (подчёркнутый); <s> (зачёркнутый); '
-            '<code> (монострочный); <pre> (блок кода); <a href="URL">…</a> (ссылка); '
-            '<span class="tg-spoiler">…</span> (спойлер). '
-            'Любые другие теги и любая Markdown-разметка запрещены — удаляй их. Используй эмодзи')
+            '⚠️ Форматируй текст строго HTML-тегами, которые поддерживает Telegram Bot API.'
+            'Разрешены ТОЛЬКО следующие теги (ничего сверх этого списка):\n'
+            '<b>…</b> и <strong>…</strong>          — жирный текст\n'
+            '<i>…</i> и <em>…</em>                 — курсив\n  '
+            '<u>…</u> и <ins>…</ins>              — подчёркнутый \n '
+            '<s>…</s>, <strike>…</strike>, <del>…</del> — зачёркнутый \n '
+            '<code>…</code>                       — моноширинный фрагмент в строке \n '
+            '<pre>…</pre>                        — блок кода (моноширинный, без переносов) \n '
+            '<a href="URL">…</a>                  — гиперссылка  \n'
+            '<span class="tg-spoiler">…</span>   — спойлер, скрытый до тапа  \n'
+            'Любые другие теги или Markdown-разметка (например `*_#[]()`) ЗАПРЕЩЕНЫ и должны быть удалены.\n'
+            'Используй эмодзи в ответах'
+        )
         # основной промпт
         messages = [
             ChatCompletionSystemMessageParam(
                 role='system',
-                content=f'{prompt.role}\n\n{prompt.prompt}'
-                # content=f'{format_prompt}\n\n{prompt.role}\n\n{prompt.prompt}'
+                content=f'{prompt.role}\n\n{prompt.prompt}\n\n{format_prompt}'
             )]
 
         # добавляем историю

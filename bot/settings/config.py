@@ -11,7 +11,7 @@ class Config:
         pay_key = os.getenv("PAY_KEY_TEST")
         wallet_id = os.getenv("WALLET_ID_TEST")
     else:
-        token = os.getenv("TOKEN_TEST")
+        token = os.getenv("TOKEN")
         pay_key = os.getenv("PAY_KEY_TEST")
         wallet_id = os.getenv("WALLET_ID_TEST")
 
