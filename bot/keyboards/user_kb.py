@@ -13,6 +13,13 @@ def get_back_kb(cb: str = CB.COM_START.value, value: str = Action.BACK.value) ->
 
 
 # Кнопки подписаться на канал
+def get_confirm_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text='✅ Принять', callback_data=f'{CB.COM_START.value}')
+    return kb.adjust(1).as_markup()
+
+
+# Кнопки подписаться на канал
 def get_main_menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO.value}')

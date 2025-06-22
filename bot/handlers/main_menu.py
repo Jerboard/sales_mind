@@ -16,8 +16,11 @@ async def com_start(msg: Message, state: FSMContext):
 
     await db.User.add(msg.from_user.id, msg.from_user.full_name, msg.from_user.username)
 
-    text = 'Приветствие срок подписки и подобное'
-    await msg.answer(text, reply_markup=kb.get_main_menu_kb())
+    text = '<a href="https://telegra.ph/Politika-ispolzovaniya-i-vozvrata--SalesMind-AI-06-22">Политика бота</a>'
+    await msg.answer(text, reply_markup=kb.get_confirm_kb())
+
+    # text = 'Приветствие срок подписки и подобное'
+    # await msg.answer(text, reply_markup=kb.get_main_menu_kb())
 
 
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.COM_START.value))
