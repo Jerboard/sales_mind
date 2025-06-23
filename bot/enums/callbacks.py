@@ -8,6 +8,7 @@ class CB(Enum):
 
     INFO_START = 'info_start'
     INFO_TEXT = 'info_text'
+    INFO_DEMO = 'info_demo'
 
     PAYMENT_START = 'payment_start'
     PAYMENT_TARIFF = 'payment_tariff'

@@ -73,9 +73,9 @@ class Prompt(models.Model):
         verbose_name="Модель",
         help_text='gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-4.1, gpt-4.1-mini, o3-pro, o3, o4-mini, gpt-3.5-turbo-0125'
     )
-    hint = models.TextField(null=True, blank=True, verbose_name="Подсказка")
     role = models.TextField(null=True, blank=True, verbose_name="Роль")
     prompt = models.TextField(null=True, blank=True, verbose_name="Промпт")
+    hint = models.TextField(null=True, blank=True, verbose_name="Подсказка")
     temperature = models.FloatField(
         verbose_name="Температура", default=0.9, help_text=f'От 0 до 2. Чем выше, тем креативнее (>1.3 глючит)'
     )

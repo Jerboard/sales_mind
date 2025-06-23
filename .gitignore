@@ -141,3 +141,4 @@ cython_debug/
 *.json
 /temp
 */migrations/
+!/web/bot_admin/migrations/__init__.py

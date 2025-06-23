@@ -25,7 +25,7 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
     # kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO.value}')
     # kb.button(text='💳 Оплата', callback_data=f'{CB.PAYMENT_START.value}')
     # kb.button(text='💻 Отправить запрос', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
-    kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO_TEXT.value}')
+    kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO_DEMO.value}')
     kb.button(text='💳 Тарифы и доступ', callback_data=f'{CB.PAYMENT_START.value}')
     kb.button(text='🚀 Начать работать', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
     kb.button(text='⚙️ Помощь', callback_data=f'{CB.INFO_START.value}')
