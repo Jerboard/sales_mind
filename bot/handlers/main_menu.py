@@ -43,7 +43,21 @@ async def accept(cb: CallbackQuery, state: FSMContext):
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_START.value))
 async def info(cb: CallbackQuery, state: FSMContext):
     text = 'Инфо о проекте'
-    await cb.message.edit_text(text, reply_markup=kb.get_info_menu_kb())
+    info = await db.Info.get_all()
+    await cb.message.edit_text(text, reply_markup=kb.get_info_menu_kb(info))
+
+
+@main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_TEXT.value))
+async def payment_start(cb: CallbackQuery, state: FSMContext):
+    _, info_id_str, back = cb.data.split(':')
+    info_id = int(info_id_str)
+
+    info = await db.Info.get_by_id(info_id)
+    await cb.message.edit_text(
+        info.description,
+        reply_markup=kb.get_back_kb(cb=back)
+    )
+
 
 @main_router.message(Command(MenuCommand.GPT.command))
 async def gpt_start_msg(msg: Message, state: FSMContext):
@@ -71,38 +85,9 @@ async def gpt_start_cb(cb: CallbackQuery, state: FSMContext):
         await ut.gpt_start(cb.from_user.id)
 
 
-@main_router.callback_query(lambda cb: cb.data.startswith(CB.PAYMENT_START.value))
-async def payment_start(cb: CallbackQuery, state: FSMContext):
-    text = (
-        '<b>🟢 Lite — 499 ₽ / мес</b>\n'
-        '30 генераций в месяц  \n'
-        '📞 Скрипты, 📩 Письма, 📈 KPI — всё включено \n '
-        'Подходит для точечных задач\n\n'
-        '<b>🔵 Pro — 999 ₽ / мес </b> \n'
-        '100 генераций в месяц  \n'
-        '+ приоритет в скорости  \n'
-        '+ доступ ко всем разделам  \n'
-        'Идеален для активных менеджеров\n'
-        '<b>🟣 Expert — 1999 ₽ / мес  </b>\n'
-        'Безлимит  \n'
-        '+ индивидуальные шаблоны  \n'
-        '+ early-доступ к новым функциям  \n'
-        'Решение для команд и руководителей\n\n'
-        '<b>🎁 Попробовать бесплатно — 5 генераций для знакомства</b>'
-    )
-    await cb.message.edit_text(text, reply_markup=kb.get_payment_kb())
-
-
-@main_router.callback_query(lambda cb: cb.data.startswith(CB.PAYMENT_TARIFF.value))
-async def payment_start(cb: CallbackQuery, state: FSMContext):
-    text = (
-        '<b>Формируем ссылку, отправляем на оплату</b>'
-    )
-    await cb.message.edit_text(text, reply_markup=kb.get_back_kb(cb=CB.PAYMENT_START.value))
-
 
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_DEMO.value))
-async def payment_start(cb: CallbackQuery, state: FSMContext):
+async def info_demo(cb: CallbackQuery, state: FSMContext):
     text = (
         '''🧠 Что я умею:
 

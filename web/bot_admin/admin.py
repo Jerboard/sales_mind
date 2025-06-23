@@ -2,7 +2,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
-from .models import User, LogsError, PromptCategory, Prompt, Message
+from .models import User, LogsError, PromptCategory, Prompt, Message, Tariff, Info
 
 
 # ────────── inlines ──────────
@@ -62,4 +62,24 @@ class MessageAdmin(ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
     date_hierarchy = "created_at"
     ordering = ("-created_at",)
+
+
+@admin.register(Tariff)
+class TariffAdmin(ModelAdmin):
+    list_display = ("id", "name", "description", "price", "is_active", "updated_at")
+    list_editable = ("name", "description", "price", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("name", "description")
+    readonly_fields = ("created_at", "updated_at")
+    ordering = ("-updated_at",)
+
+
+@admin.register(Info)
+class InfoAdmin(ModelAdmin):
+    list_display = ("name", "is_active", "updated_at")
+    list_editable = ("is_active",)
+    list_filter = ("is_active",)
+    search_fields = ("name", "description")
+    readonly_fields = ("created_at", "updated_at")
+    ordering = ("-updated_at",)
 

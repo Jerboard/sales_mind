@@ -1,5 +1,15 @@
 from django.db import models
-# from django.utils import timezone
+from django.utils.safestring import mark_safe
+
+
+help_text_for_text = mark_safe(
+    '&lt;b&gt;&lt;/b&gt; - <b>жирный</b> '
+    '&lt;i&gt;&lt;/i&gt; - <i>италик</i> '
+    '&lt;u&gt;&lt;/u&gt; - <u>подчёркнутый</u> '
+    '&lt;s&gt;&lt;/s&gt; - <s>зачёркнутый</s> '
+    '&lt;code&gt;&lt;/code&gt; - <code>моноширинный (копируется)</code>'
+    '&lt;pre&gt;&lt;/pre&gt; - <pre>блок кода</pre>'
+    )
 
 
 # Пользователи
@@ -66,6 +76,9 @@ class Prompt(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
     category = models.ForeignKey(PromptCategory, on_delete=models.CASCADE, db_column="category_id", verbose_name="Категория")
     name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Название")
+    role = models.TextField(null=True, blank=True, verbose_name="Роль")
+    prompt = models.TextField(null=True, blank=True, verbose_name="Промпт")
+    hint = models.TextField(null=True, blank=True, verbose_name="Подсказка", help_text=help_text_for_text)
     model = models.CharField(
         max_length=255,
         null=True,
@@ -73,9 +86,6 @@ class Prompt(models.Model):
         verbose_name="Модель",
         help_text='gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-4.1, gpt-4.1-mini, o3-pro, o3, o4-mini, gpt-3.5-turbo-0125'
     )
-    role = models.TextField(null=True, blank=True, verbose_name="Роль")
-    prompt = models.TextField(null=True, blank=True, verbose_name="Промпт")
-    hint = models.TextField(null=True, blank=True, verbose_name="Подсказка")
     temperature = models.FloatField(
         verbose_name="Температура", default=0.9, help_text=f'От 0 до 2. Чем выше, тем креативнее (>1.3 глючит)'
     )
@@ -118,3 +128,38 @@ class Message(models.Model):
         # managed = False
 
     def __str__(self): return self.user or f"Запрос #{self.id}"
+
+
+class Tariff(models.Model):
+    id = models.BigAutoField(primary_key=True, verbose_name="ID")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создана")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлена")
+
+    name = models.CharField(max_length=100, verbose_name="Название", help_text="На кнопке",)
+    description = models.TextField(verbose_name="Описание", help_text=help_text_for_text)
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость",)
+    is_active = models.BooleanField(default=True, verbose_name="Активна")
+
+    class Meta:
+        db_table = "tariffs"
+        verbose_name = "Тариф"
+        verbose_name_plural = "Тарифы"
+
+    def __str__(self):
+        return self.name
+
+
+class Info(models.Model):
+    id = models.BigAutoField(primary_key=True, verbose_name="ID")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создана")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлена")
+    name = models.CharField(max_length=100, verbose_name="Название", help_text="На кнопке")
+    description = models.TextField(verbose_name="Описание")
+    is_active = models.BooleanField(default=True, verbose_name="Активна")
+
+    class Meta:
+        db_table = "info"
+        verbose_name = "Информация"
+        verbose_name_plural = "Информация"
+
+    def __str__(self): return self.name

@@ -34,7 +34,12 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
             ChatCompletionSystemMessageParam(
                 role='system',
                 content=f'{prompt.role}\n\n{prompt.prompt}\n\n{format_prompt}'
-            )]
+            ),
+            ChatCompletionAssistantMessageParam(
+                role='assistant',
+                content=f'{prompt.prompt}\n\n{format_prompt}'
+            ),
+        ]
 
         # добавляем историю
         for m in history:

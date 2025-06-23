@@ -25,7 +25,7 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
     # kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO.value}')
     # kb.button(text='💳 Оплата', callback_data=f'{CB.PAYMENT_START.value}')
     # kb.button(text='💻 Отправить запрос', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
-    kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO_DEMO.value}')
+    kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO_TEXT.value}:1:com_start')
     kb.button(text='💳 Тарифы и доступ', callback_data=f'{CB.PAYMENT_START.value}')
     kb.button(text='🚀 Начать работать', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
     kb.button(text='⚙️ Помощь', callback_data=f'{CB.INFO_START.value}')
@@ -34,14 +34,14 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
 
 
 # Кнопки подписаться на канал
-def get_info_menu_kb() -> InlineKeyboardMarkup:
-    kb = InlineKeyboardBuilder()
-    kb.button(text='📘 Как пользоваться', callback_data=f'{CB.INFO_TEXT.value}')
-    kb.button(text='🧾 Условия и политика', callback_data=f'{CB.INFO_TEXT.value}')
-    kb.button(text='💬 Написать в поддержку', callback_data=f'{CB.INFO_TEXT.value}:{Action.EDIT.value}')
-    kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
-
-    return kb.adjust(1).as_markup()
+# def get_info_menu_kb() -> InlineKeyboardMarkup:
+#     kb = InlineKeyboardBuilder()
+#     kb.button(text='📘 Как пользоваться', callback_data=f'{CB.INFO_TEXT.value}')
+#     kb.button(text='🧾 Условия и политика', callback_data=f'{CB.INFO_TEXT.value}')
+#     kb.button(text='💬 Написать в поддержку', callback_data=f'{CB.INFO_TEXT.value}:{Action.EDIT.value}')
+#     kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
+#
+#     return kb.adjust(1).as_markup()
 
 
 # Выбор категории
@@ -73,12 +73,20 @@ def get_new_query_kb(message_id: int) -> InlineKeyboardMarkup:
 
 
 # Основные тарифы
-def get_payment_kb() -> InlineKeyboardMarkup:
+def get_payment_kb(tariffs: list[db.Tariff]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text='🟢 Lite — 499 ₽ / мес', callback_data=f'{CB.PAYMENT_TARIFF.value}')
-    kb.button(text='🔵 Pro — 999 ₽ / мес', callback_data=f'{CB.PAYMENT_TARIFF.value}')
-    kb.button(text='🟣 Expert — 1999 ₽ / мес', callback_data=f'{CB.PAYMENT_TARIFF.value}:{Action.EDIT.value}')
-    kb.button(text='🎁 Попробовать бесплатно', callback_data=f'{CB.PAYMENT_TARIFF.value}:{Action.EDIT.value}')
+    for tariff in tariffs:
+        kb.button(text=tariff.name, callback_data=f'{CB.PAYMENT_TARIFF.value}:{tariff.id}')
+    kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
+
+    return kb.adjust(1).as_markup()
+
+
+# Инфо кнопки
+def get_info_menu_kb(info: list[db.Info]) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    for i in info:
+        kb.button(text=i.name, callback_data=f'{CB.INFO_TEXT.value}:{i.id}:{CB.INFO_START.value}')
     kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
 
     return kb.adjust(1).as_markup()
