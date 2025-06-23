@@ -71,11 +71,14 @@ def get_new_query_kb(message_id: int) -> InlineKeyboardMarkup:
 
     return kb.adjust(2, 1).as_markup()
 
-'''
-🧠 Что я умею
-📞 Скрипты звонков
-📩 Письма клиентам
-📈 KPI / тесты
-💼 Найм / развитие
-🧾 Подписка и тарифы
-'''
+
+# Основные тарифы
+def get_payment_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text='🟢 Lite — 499 ₽ / мес', callback_data=f'{CB.PAYMENT_TARIFF.value}')
+    kb.button(text='🔵 Pro — 999 ₽ / мес', callback_data=f'{CB.PAYMENT_TARIFF.value}')
+    kb.button(text='🟣 Expert — 1999 ₽ / мес', callback_data=f'{CB.PAYMENT_TARIFF.value}:{Action.EDIT.value}')
+    kb.button(text='🎁 Попробовать бесплатно', callback_data=f'{CB.PAYMENT_TARIFF.value}:{Action.EDIT.value}')
+    kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
+
+    return kb.adjust(1).as_markup()
