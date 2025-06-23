@@ -4,7 +4,11 @@ from enum import Enum
 # Команды меню
 class CB(Enum):
     COM_START = 'com_start'
-    INFO = 'info'
+    ACCEPT = 'accept'
+
+    INFO_START = 'info_start'
+    INFO_TEXT = 'info_text'
+
     PAYMENT_START = 'payment_start'
 
     GPT_START = 'gpt_start'

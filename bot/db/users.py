@@ -13,11 +13,11 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(sa.BigInteger, primary_key=True)
 
-    # user_id: Mapped[int] = mapped_column(sa.ForeignKey("users.id"))
-    # created_at: Mapped[datetime] = mapped_column(sa.DateTime(), default=sa.func.now())
     full_name: Mapped[str] = mapped_column(sa.String)
     username: Mapped[str] = mapped_column(sa.String, nullable=True)
     subscription_end: Mapped[datetime] = mapped_column(sa.DateTime, nullable=True)
+
+    is_accepted: Mapped[bool] = mapped_column(sa.Boolean, default=False)
 
     @classmethod
     async def add(cls, user_id: int, full_name: str, username: str) -> None:
@@ -41,3 +41,16 @@ class User(Base):
             result = await conn.execute(query)
             await conn.commit()
         return result.inserted_primary_key[0]
+
+    @classmethod
+    async def update(cls, user_id: int, is_accepted: bool = None) -> None:
+        """Обновляет данные"""
+        now = datetime.now()
+        query = sa.update(cls).where(cls.id == user_id).values(updated_at=now)
+
+        if is_accepted is not None:
+            query = query.values(is_accepted=is_accepted)
+
+        async with begin_connection() as conn:
+            await conn.execute(query)
+            await conn.commit()

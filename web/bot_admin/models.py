@@ -10,6 +10,7 @@ class User(models.Model):
     full_name = models.CharField(max_length=255, verbose_name="Полное имя")
     username = models.CharField(max_length=255, null=True, blank=True, verbose_name="Username")
     subscription_end = models.DateTimeField(null=True, blank=True, verbose_name="Окончание подписки")
+    is_accepted = models.BooleanField(verbose_name="Принял правила", default=False)
 
     class Meta:
         db_table = "users"

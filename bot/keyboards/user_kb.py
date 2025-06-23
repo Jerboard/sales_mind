@@ -15,16 +15,31 @@ def get_back_kb(cb: str = CB.COM_START.value, value: str = Action.BACK.value) ->
 # Кнопки подписаться на канал
 def get_confirm_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text='✅ Принять', callback_data=f'{CB.COM_START.value}')
+    kb.button(text='✅ Принять', callback_data=f'{CB.ACCEPT.value}')
     return kb.adjust(1).as_markup()
 
 
 # Кнопки подписаться на канал
 def get_main_menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO.value}')
-    kb.button(text='💳 Оплата', callback_data=f'{CB.PAYMENT_START.value}')
-    kb.button(text='💻 Отправить запрос', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
+    # kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO.value}')
+    # kb.button(text='💳 Оплата', callback_data=f'{CB.PAYMENT_START.value}')
+    # kb.button(text='💻 Отправить запрос', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
+    kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO_TEXT.value}')
+    kb.button(text='💳 Тарифы и доступ', callback_data=f'{CB.PAYMENT_START.value}')
+    kb.button(text='🚀 Начать работать', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
+    kb.button(text='⚙️ Помощь', callback_data=f'{CB.INFO_START.value}')
+
+    return kb.adjust(1).as_markup()
+
+
+# Кнопки подписаться на канал
+def get_info_menu_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text='📘 Как пользоваться', callback_data=f'{CB.INFO_TEXT.value}')
+    kb.button(text='🧾 Условия и политика', callback_data=f'{CB.INFO_TEXT.value}')
+    kb.button(text='💬 Написать в поддержку', callback_data=f'{CB.INFO_TEXT.value}:{Action.EDIT.value}')
+    kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
 
     return kb.adjust(1).as_markup()
 

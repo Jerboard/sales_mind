@@ -16,27 +16,49 @@ async def com_start(msg: Message, state: FSMContext):
 
     await db.User.add(msg.from_user.id, msg.from_user.full_name, msg.from_user.username)
 
-    text = '<a href="https://telegra.ph/Politika-ispolzovaniya-i-vozvrata--SalesMind-AI-06-22">Политика бота</a>'
-    await msg.answer(text, reply_markup=kb.get_confirm_kb())
+    user = await db.User.get_by_id(msg.from_user.id)
 
-    # text = 'Приветствие срок подписки и подобное'
-    # await msg.answer(text, reply_markup=kb.get_main_menu_kb())
+    # если принял правила то на главную, если нет то принимать
+    if user.is_accepted:
+        await ut.send_main_menu(user_id=user.id)
+    else:
+        text = ('Для взаимодействия с ботом необходимо ознакомиться и принять '
+                '<a href="https://telegra.ph/Politika-ispolzovaniya-i-vozvrata--SalesMind-AI-06-22">'
+                'политику использования</a>')
+        await msg.answer(text, reply_markup=kb.get_confirm_kb())
 
 
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.COM_START.value))
 async def back_start(cb: CallbackQuery, state: FSMContext):
-    text = 'Приветствие срок подписки и подобное'
-    await cb.message.edit_text(text, reply_markup=kb.get_main_menu_kb())
+    await ut.send_main_menu(user_id=cb.from_user.id, msg_id=cb.message.message_id)
 
 
-@main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO.value))
+@main_router.callback_query(lambda cb: cb.data.startswith(CB.ACCEPT.value))
+async def back_start(cb: CallbackQuery, state: FSMContext):
+    await db.User.update(user_id=cb.from_user.id, is_accepted=True)
+
+    await ut.send_main_menu(user_id=cb.from_user.id, msg_id=cb.message.message_id)
+
+
+@main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_START.value))
 async def info(cb: CallbackQuery, state: FSMContext):
     text = 'Инфо о проекте'
-    await cb.message.edit_text(text, reply_markup=kb.get_back_kb())
+    await cb.message.edit_text(text, reply_markup=kb.get_info_menu_kb())
 
 
 @main_router.message(Command(MenuCommand.GPT.command))
 async def gpt_start_msg(msg: Message, state: FSMContext):
+
+    user = await db.User.get_by_id(msg.from_user.id)
+
+    # если принял правила то на главную, если нет то принимать
+    if not user.is_accepted:
+        text = ('Для взаимодействия с ботом необходимо ознакомиться и принять '
+                '<a href="https://telegra.ph/Politika-ispolzovaniya-i-vozvrata--SalesMind-AI-06-22">'
+                'политику использования</a>')
+        await msg.answer(text, reply_markup=kb.get_confirm_kb())
+        return
+
     await ut.gpt_start(msg.from_user.id)
 
 

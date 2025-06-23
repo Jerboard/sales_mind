@@ -21,7 +21,7 @@ async def gpt_category(cb: CallbackQuery, state: FSMContext):
 
     prompts = await db.Prompt.get_prompt_category(category_id)
 
-    text = 'Выбирите промпт'
+    text = 'Выбирите сценарий'
     markup = kb.get_prompt_kb(prompts)
 
     await cb.message.edit_text(text, reply_markup=markup)
