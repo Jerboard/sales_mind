@@ -5,6 +5,8 @@ from enum import Enum
 class MenuCommand(Enum):
     START = ('start', '🔄 В начало')
     GPT = ('gpt', '💻 Создать запрос')
+    PRICE = ('price', '💳 Тарифы и доступ')
+    HELP = ('help', '⚙️ Помощь')
 
     def __init__(self, command, label):
         self.command = command

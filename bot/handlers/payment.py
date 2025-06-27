@@ -15,15 +15,16 @@ from enums import CB, MenuCommand, Action
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.PAYMENT_START.value))
 async def payment_start(cb: CallbackQuery, state: FSMContext):
-    tariffs = await db.Tariff.get_all()
-
-    text = ''
-    for tariff in tariffs:
-        text += f'{tariff.description}\n\n'
-
-    text += f'<b>🎁 Попробовать бесплатно — 5 генераций для знакомства</b>'
-
-    await cb.message.edit_text(text, reply_markup=kb.get_payment_kb(tariffs))
+    await ut.send_payment_start(user_id=cb.from_user.id, msg_id=cb.message.message_id)
+    # tariffs = await db.Tariff.get_all()
+    #
+    # text = ''
+    # for tariff in tariffs:
+    #     text += f'{tariff.description}\n\n'
+    #
+    # text += f'<b>🎁 Попробовать бесплатно — 5 генераций для знакомства</b>'
+    #
+    # await cb.message.edit_text(text, reply_markup=kb.get_payment_kb(tariffs))
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.PAYMENT_TARIFF.value))

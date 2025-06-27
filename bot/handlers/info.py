@@ -11,9 +11,11 @@ from enums import CB, MenuCommand, Action
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_START.value))
 async def info(cb: CallbackQuery, state: FSMContext):
-    text = 'Инфо о проекте'
-    info = await db.Info.get_all()
-    await cb.message.edit_text(text, reply_markup=kb.get_info_menu_kb(info))
+    await ut.send_info_start(user_id=cb.from_user.id, msg_id=cb.message.message_id)
+
+    # text = 'Инфо о проекте'
+    # info = await db.Info.get_all()
+    # await cb.message.edit_text(text, reply_markup=kb.get_info_menu_kb(info))
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_TEXT.value))

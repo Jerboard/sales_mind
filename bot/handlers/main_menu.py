@@ -57,7 +57,7 @@ async def gpt_start_msg(msg: Message, state: FSMContext):
         await msg.answer(text, reply_markup=kb.get_confirm_kb())
         return
 
-    await ut.gpt_start(msg.from_user.id)
+    await ut.send_gpt_start(msg.from_user.id)
 
 
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_START.value))
@@ -65,39 +65,20 @@ async def gpt_start_cb(cb: CallbackQuery, state: FSMContext):
     _, action = cb.data.split(':')
 
     if action == Action.EDIT.value:
-        await ut.gpt_start(cb.from_user.id, msg_id=cb.message.message_id)
+        await ut.send_gpt_start(cb.from_user.id, msg_id=cb.message.message_id)
     else:
-        await ut.gpt_start(cb.from_user.id)
+        await ut.send_gpt_start(cb.from_user.id)
 
 
+@main_router.message(Command(MenuCommand.PRICE.command))
+async def gpt_price_msg(msg: Message, state: FSMContext):
+    await state.clear()
 
-@main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_DEMO.value))
-async def info_demo(cb: CallbackQuery, state: FSMContext):
-    text = (
-        '''🧠 Что я умею:
-
-📞 Генерировать скрипты звонков  
-— Холодные, повторные, апсейлы, диагностика
-
-📩 Создавать письма и follow-up  
-— Первый контакт, напоминания, ответы на тишину
-
-📈 Строить KPI и планы  
-— Месячные цели, активность, показатели команды
-
-👥 Помогать с наймом  
-— Вакансии, тестовые задания, скрипты интервью
-
-🧠 Отвечать на возражения  
-— Дорого, нет времени, «мы подумаем» — всё решаемо
-
-📋 Давать чек-листы  
-— Перед звонком, после встречи, перед сделкой
-
-⚡️ Работать мгновенно и без суеты  
-— Просто опиши задачу — остальное сделаю я.
-'''
-    )
-    await cb.message.edit_text(text, reply_markup=kb.get_back_kb())
+    await ut.send_payment_start(user_id=msg.from_user.id)
 
 
+@main_router.message(Command(MenuCommand.HELP.command))
+async def gpt_help_msg(msg: Message, state: FSMContext):
+    await state.clear()
+
+    await ut.send_info_start(user_id=msg.from_user.id)

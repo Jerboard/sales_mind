@@ -20,7 +20,7 @@ async def free_msg_hnd(msg: Message):
     print(f'free_msg_hnd:\n{msg.content_type}\n{msg.text}')
 
     await msg.answer('🤷‍♂️ Не понял твоего вопроса, выбери сначала контекст')
-    await ut.gpt_start(user_id=msg.from_user.id)
+    await ut.send_gpt_start(user_id=msg.from_user.id)
 
 
 

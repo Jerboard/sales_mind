@@ -26,7 +26,7 @@ async def send_main_menu(user: db.User = None, user_id: int = None, msg_id: int 
 
 
 # старт запроса к гпт
-async def gpt_start(user_id: int, msg_id: int = None):
+async def send_gpt_start(user_id: int, msg_id: int = None):
     categories = await db.PromptCategory.get_all()
     text = '✅ Выбери нужный сценарий'
     markup = kb.get_prompt_categories_kb(categories)
@@ -78,3 +78,28 @@ async def send_gpt_answer(
         log_error(e)
 
 
+async def send_payment_start(user_id: int, msg_id: int = None):
+    tariffs = await db.Tariff.get_all()
+
+    text = ''
+    for tariff in tariffs:
+        text += f'{tariff.description}\n\n'
+
+    text += f'<b>🎁 Попробовать бесплатно — 5 генераций для знакомства</b>'
+
+    markup = kb.get_payment_kb(tariffs)
+    if msg_id:
+        await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
+    else:
+        await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)
+
+
+async def send_info_start(user_id: int, msg_id: int = None):
+    text = 'Инфо о проекте'
+    info = await db.Info.get_all()
+
+    markup = kb.get_info_menu_kb(info)
+    if msg_id:
+        await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
+    else:
+        await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)
