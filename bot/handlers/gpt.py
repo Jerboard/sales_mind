@@ -58,50 +58,28 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
 # сам запрос
 @client_router.message(StateFilter(CB.GPT_PROMPT.value))
 async def gpt_prompt_msg(msg: Message, state: FSMContext):
-    try:
-        current_state = await state.get_state()
-        # if not current_state:
-        #     await msg.answer(f'😅 Что-то пошло не так...\nПопробуйте повторить запрос /{MenuCommand.GPT.command}')
-        #     log_error(f'gpt_prompt_msg, нет состаяния', wt=False)
-        #     return
+    data = await state.get_data()
 
-        sent = await msg.answer('Думаю...')
+    await ut.send_gpt_answer(
+        user_id=msg.from_user.id,
+        user_prompt=msg.text,
+        prompt_id=data.get('prompt_id')
+    )
 
-        data = await state.get_data()
-        # await state.clear()
 
-        prompt = await db.Prompt.get_by_id(data.get('prompt_id'))
-        # if not prompt:
-        #     await msg.answer(f'😅 Что-то пошло не так...\nПопробуйте повторить запрос /{MenuCommand.GPT.command}')
-        #     log_error(f'gpt_prompt_msg, нет запроса', wt=False)
-        #     return
+@client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_REPEAT.value))
+async def gpt_rate(cb: CallbackQuery, state: FSMContext):
+    _, answer_id_str = cb.data.split(':')
+    answer_id = int(answer_id_str)
 
-        history = await db.Message.get_user_history(user_id=msg.from_user.id, prompt_id=prompt.id)
-        gpt_answer, usage = await ut.ask_gpt(prompt=prompt, history=history, user_prompt=msg.text)
+    answer = await db.Message.get_by_id(answer_id)
+    prompt = 'Предложи ещё варианты по предидущему запросу'
 
-        message_id = await db.Message.add(
-            user_id=msg.from_user.id,
-            prompt_id=prompt.id,
-            request=msg.text,
-            response=gpt_answer,
-            prompt_tokens=usage.get('prompt_tokens', 0),
-            completion_tokens=usage.get('completion_tokens', 0),
-            time_answer=usage.get('time_answer'),
-        )
-        text = (
-            f'{gpt_answer}\n\n'
-            f'💬 Что-то не так или нужно уточнить? Просто напиши — бот всё пересоберёт.'
-        )
-        markup = kb.get_new_query_kb(message_id)
-        try:
-            await sent.edit_text(text=text, reply_markup=markup)
-        except Exception as e:
-            log_error(e)
-            await sent.edit_text(text=text, parse_mode=None, reply_markup=markup)
-
-    except Exception as e:
-        await msg.answer(f'😅 Что-то пошло не так...\nПопробуйте повторить запрос /{MenuCommand.GPT.command}')
-        log_error(e)
+    await ut.send_gpt_answer(
+        user_id=cb.from_user.id,
+        user_prompt=prompt,
+        prompt_id=answer.prompt_id
+    )
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_RATE.value))

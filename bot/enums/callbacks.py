@@ -16,5 +16,6 @@ class CB(Enum):
     GPT_START = 'gpt_start'
     GPT_CATEGORY = 'gpt_category'
     GPT_PROMPT = 'gpt_prompt'
+    GPT_REPEAT = 'gpt_repeat'
     GPT_RATE = 'gpt_rate'
 
