@@ -14,6 +14,9 @@ from enums import CB, MenuCommand, Action
 async def com_start(msg: Message, state: FSMContext):
     await state.clear()
 
+    for i in msg.dict().items():
+        print(i)
+
     await db.User.add(msg.from_user.id, msg.from_user.full_name, msg.from_user.username)
 
     user = await db.User.get_by_id(msg.from_user.id)
@@ -40,27 +43,9 @@ async def accept(cb: CallbackQuery, state: FSMContext):
     await ut.send_main_menu(user_id=cb.from_user.id, msg_id=cb.message.message_id)
 
 
-@main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_START.value))
-async def info(cb: CallbackQuery, state: FSMContext):
-    text = 'Инфо о проекте'
-    info = await db.Info.get_all()
-    await cb.message.edit_text(text, reply_markup=kb.get_info_menu_kb(info))
-
-
-@main_router.callback_query(lambda cb: cb.data.startswith(CB.INFO_TEXT.value))
-async def payment_start(cb: CallbackQuery, state: FSMContext):
-    _, info_id_str, back = cb.data.split(':')
-    info_id = int(info_id_str)
-
-    info = await db.Info.get_by_id(info_id)
-    await cb.message.edit_text(
-        info.description,
-        reply_markup=kb.get_back_kb(cb=back)
-    )
-
-
 @main_router.message(Command(MenuCommand.GPT.command))
 async def gpt_start_msg(msg: Message, state: FSMContext):
+    await state.clear()
 
     user = await db.User.get_by_id(msg.from_user.id)
 

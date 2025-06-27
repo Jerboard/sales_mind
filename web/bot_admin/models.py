@@ -20,6 +20,7 @@ class User(models.Model):
     full_name = models.CharField(max_length=255, verbose_name="Полное имя")
     username = models.CharField(max_length=255, null=True, blank=True, verbose_name="Username")
     subscription_end = models.DateTimeField(null=True, blank=True, verbose_name="Окончание подписки")
+    requests_remaining = models.IntegerField(default=0, verbose_name="Осталось запросов")
     is_accepted = models.BooleanField(verbose_name="Принял правила", default=False)
 
     class Meta:
@@ -138,6 +139,8 @@ class Tariff(models.Model):
     name = models.CharField(max_length=100, verbose_name="Название", help_text="На кнопке",)
     description = models.TextField(verbose_name="Описание", help_text=help_text_for_text)
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость",)
+    duration = models.IntegerField(verbose_name="Продолжительность в днях", default=0)
+    response_count = models.IntegerField(verbose_name="Количество запросов", default=0)
     is_active = models.BooleanField(default=True, verbose_name="Активна")
 
     class Meta:

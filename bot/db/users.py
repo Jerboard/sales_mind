@@ -16,6 +16,7 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(sa.String)
     username: Mapped[str] = mapped_column(sa.String, nullable=True)
     subscription_end: Mapped[datetime] = mapped_column(sa.DateTime, nullable=True)
+    requests_remaining: Mapped[int] = mapped_column(sa.Integer, default=False)
 
     is_accepted: Mapped[bool] = mapped_column(sa.Boolean, default=False)
 

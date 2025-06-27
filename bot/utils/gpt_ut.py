@@ -12,6 +12,10 @@ from init import client_openai
 from settings import log_error
 
 
+def parse_gpt_answer(text: str) -> str:
+    return text.replace('<br>', '\n')
+
+
 async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str) -> tuple[str, dict]:
     try:
         time_start = datetime.now()
@@ -79,7 +83,8 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
         usage = response.usage.dict()
         usage['time_answer'] = str(datetime.now() - time_start)
 
-        return response.choices[0].message.content, usage
+        # return response.choices[0].message.content, usage
+        return parse_gpt_answer(response.choices[0].message.content), usage
 
     except Exception as e:
         log_error(e)
