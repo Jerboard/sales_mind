@@ -5,6 +5,7 @@ from openai.types.chat import (
     ChatCompletionAssistantMessageParam,  # "assistant"
     ChatCompletionToolMessageParam,       # "tool"
 )
+import bleach
 from datetime import datetime
 
 import db
@@ -13,7 +14,26 @@ from settings import log_error
 
 
 def parse_gpt_answer(text: str) -> str:
-    return text.replace('<br>', '\n')
+    text = text.replace('<br>', '\n')
+    unwanted = ['<ul>', '</ul>', '<li>', '</li>',]
+    for token in unwanted:
+        text = text.replace(token, '')
+
+    return text.strip()
+
+
+def telegram_sanitize(html: str) -> str:
+    tg_tags = ["b", "strong", "i", "em", "u", "ins", "s", "strike", "del", "code", "pre", "a", "span"]
+    tg_attrs = {"a": ["href"], "span": ["class"]}
+    tg_attr_filter = {"span": lambda tag, name, value: value == "tg-spoiler"}
+
+    return bleach.clean(
+        html,
+        tags=tg_tags,
+        attributes=tg_attrs,
+        protocols=["http", "https"],
+        strip=True,
+    )
 
 
 async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str) -> tuple[str, dict]:
@@ -37,11 +57,11 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
         messages = [
             ChatCompletionSystemMessageParam(
                 role='system',
-                content=f'{prompt.role}\n\n{prompt.prompt}\n\n{format_prompt}'
+                content=f'{prompt.role}\n\n{prompt.prompt}'
             ),
             ChatCompletionAssistantMessageParam(
                 role='assistant',
-                content=f'{prompt.prompt}\n\n{format_prompt}'
+                content=f'{prompt.prompt}'
             ),
         ]
 
@@ -64,7 +84,7 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
         messages.append(
             ChatCompletionUserMessageParam(
                 role="user",
-                content=user_prompt
+                content=f'{user_prompt}\n\n{format_prompt}'
             )
         )
 
@@ -84,7 +104,8 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
         usage['time_answer'] = str(datetime.now() - time_start)
 
         # return response.choices[0].message.content, usage
-        return parse_gpt_answer(response.choices[0].message.content), usage
+        # return parse_gpt_answer(response.choices[0].message.content), usage
+        return telegram_sanitize(response.choices[0].message.content), usage
 
     except Exception as e:
         log_error(e)

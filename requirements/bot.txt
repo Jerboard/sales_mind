@@ -3,3 +3,4 @@ asyncpg
 sqlalchemy
 openai
 uvloop
+bleach
