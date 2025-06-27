@@ -95,7 +95,7 @@ async def send_payment_start(user_id: int, msg_id: int = None):
 
 
 async def send_info_start(user_id: int, msg_id: int = None):
-    text = 'Инфо о проекте'
+    text = 'Выбери, что ты хочешь узнать 👇'
     info = await db.Info.get_all()
 
     markup = kb.get_info_menu_kb(info)
