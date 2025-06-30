@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.safestring import mark_safe
 
+from enums import HANDLER_KEY_CHOICES
+
 
 help_text_for_text = mark_safe(
     '&lt;b&gt;&lt;/b&gt; - <b>жирный</b> '
@@ -29,7 +31,8 @@ class User(models.Model):
         verbose_name_plural = "Пользователи"
         # managed = False
 
-    def __str__(self): return self.full_name
+    def __str__(self):
+        return f'{self.full_name}'
 
 
 # Логи ошибок
@@ -50,7 +53,8 @@ class LogsError(models.Model):
         verbose_name_plural = "Логи ошибок"
         # managed = False
 
-    def __str__(self): return f"Ошибка #{self.id}"
+    def __str__(self):
+        return f"Ошибка #{self.id}"
 
 
 # Категории промптов
@@ -67,7 +71,8 @@ class PromptCategory(models.Model):
         verbose_name_plural = "Категории промптов"
         # managed = False
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return f'{self.name}'
 
 
 # Промпты
@@ -104,7 +109,8 @@ class Prompt(models.Model):
         verbose_name_plural = "Промпты"
         # managed = False
 
-    def __str__(self): return self.name or f"Промпт #{self.id}"
+    def __str__(self):
+        return f"Промпт #{self.id} {self.name}"
 
 
 # Промпты
@@ -128,7 +134,8 @@ class Message(models.Model):
         verbose_name_plural = "Запросы"
         # managed = False
 
-    def __str__(self): return self.user or f"Запрос #{self.id}"
+    def __str__(self):
+        return f"Запрос #{self.id}"
 
 
 class Tariff(models.Model):
@@ -149,7 +156,7 @@ class Tariff(models.Model):
         verbose_name_plural = "Тарифы"
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
 
 
 class Info(models.Model):
@@ -165,4 +172,39 @@ class Info(models.Model):
         verbose_name = "Информация"
         verbose_name_plural = "Информация"
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return f'{self.name}'
+
+
+class LogsUser(models.Model):
+    id = models.BigAutoField(primary_key=True, verbose_name="ID")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
+    user = models.ForeignKey("User", on_delete=models.CASCADE, verbose_name="Пользователь")
+    action = models.CharField(max_length=255, verbose_name="Действие", choices=HANDLER_KEY_CHOICES)
+    comment = models.TextField(verbose_name="Комментарий", null=True, blank=True)
+    msg = models.ForeignKey("Message", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Ответ ГПТ")
+
+    class Meta:
+        db_table = "logs_users"
+        verbose_name = "Действия пользователя"
+        verbose_name_plural = "Действия пользователей"
+
+    def __str__(self):
+        return f"{self.user} — {self.action}"
+
+
+class Text(models.Model):
+    id = models.BigAutoField(primary_key=True, verbose_name="ID")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
+    key = models.CharField(max_length=255, verbose_name="Ключ")
+    text = models.TextField(verbose_name="Текст", help_text=help_text_for_text)
+
+    class Meta:
+        db_table = "texts"
+        verbose_name = "Текст"
+        verbose_name_plural = "Тексты"
+
+    def __str__(self):
+        return f'{self.key}'

@@ -6,18 +6,12 @@ from init import bot
 import keyboards as kb
 from settings import conf, log_error
 from utils.gpt_ut import ask_gpt
-from enums import MenuCommand
+from enums import MenuCommand, HandlerKey
 
 
 # старт запроса к гпт
 async def send_main_menu(user: db.User = None, user_id: int = None, msg_id: int = None):
-    text = ('🤖 Привет!\n'
-            'Я — SalesMind AI, твой ассистент по продажам.\n'
-            'Скрипты, письма, KPI, найм — всё за секунды.\n\n'
-            '🎯 Хочешь видеть быть в курсе обновлений, реальных кейсов работы с ботом и новостей?\n'
-            'Подписывайся на канал 👉 @SalesMindAI\n\n'
-            'Выбирай, что нужно 👇'
-            )
+    text = await db.Text.get_text(HandlerKey.BACK_START.key)
     markup = kb.get_main_menu_kb()
     if msg_id:
         await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
@@ -28,7 +22,9 @@ async def send_main_menu(user: db.User = None, user_id: int = None, msg_id: int 
 # старт запроса к гпт
 async def send_gpt_start(user_id: int, msg_id: int = None):
     categories = await db.PromptCategory.get_all()
-    text = '✅ Выбери нужный сценарий'
+    text = await db.Text.get_text(HandlerKey.GPT_START_MSG.key)
+
+    # text = '✅ Выбери нужный сценарий'
     markup = kb.get_prompt_categories_kb(categories)
     if msg_id:
         await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
@@ -44,7 +40,8 @@ async def send_gpt_answer(
 ):
 
     try:
-        sent = await bot.send_message(chat_id=user_id, text='Думаю...')
+        text = await db.Text.get_text(HandlerKey.GPT_PROMPT_PRE_MSG.key)
+        sent = await bot.send_message(chat_id=user_id, text=text)
 
         prompt = await db.Prompt.get_by_id(prompt_id)
         history = await db.Message.get_user_history(user_id=user_id, prompt_id=prompt.id)
@@ -60,9 +57,10 @@ async def send_gpt_answer(
             completion_tokens=usage.get('completion_tokens', 0),
             time_answer=usage.get('time_answer'),
         )
+        text_bottom = await db.Text.get_text(HandlerKey.GPT_PROMPT_MSG.key)
         text = (
             f'{gpt_answer}\n\n'
-            f'💬 Что-то не так или нужно уточнить? Просто напиши — бот всё пересоберёт.'
+            f'{text_bottom}'
         )
         markup = kb.get_new_query_kb(message_id)
         try:
@@ -71,10 +69,12 @@ async def send_gpt_answer(
             log_error(e)
             await sent.edit_text(text=text, parse_mode=None, reply_markup=markup)
 
+        return message_id
+
     except Exception as e:
-        await bot.send_message(
-            chat_id=user_id, text=f'😅 Что-то пошло не так...\nПопробуйте повторить запрос /{MenuCommand.GPT.command}'
-        )
+        text = await db.Text.get_text(HandlerKey.GPT_PROMPT_ERROR_MSG.key)
+
+        await bot.send_message(chat_id=user_id, text=text)
         log_error(e)
 
 
@@ -85,7 +85,9 @@ async def send_payment_start(user_id: int, msg_id: int = None):
     for tariff in tariffs:
         text += f'{tariff.description}\n\n'
 
-    text += f'<b>🎁 Попробовать бесплатно — 5 генераций для знакомства</b>'
+    text += await db.Text.get_text(HandlerKey.PAY_START_MSG.key)
+
+    # text += f'<b>🎁 Попробовать бесплатно — 5 генераций для знакомства</b>'
 
     markup = kb.get_payment_kb(tariffs)
     if msg_id:
@@ -96,6 +98,8 @@ async def send_payment_start(user_id: int, msg_id: int = None):
 
 async def send_info_start(user_id: int, msg_id: int = None):
     text = 'Выбери, что ты хочешь узнать 👇'
+    text = await db.Text.get_text(HandlerKey.HELP_START_MSG.key,)
+
     info = await db.Info.get_all()
 
     markup = kb.get_info_menu_kb(info)

@@ -5,3 +5,5 @@ from .messages import Message
 from .tariffs import Tariff
 from .info import Info
 from .logs_error import LogsError
+from .logs_users import LogsUser
+from .texts import Text

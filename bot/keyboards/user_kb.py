@@ -22,10 +22,10 @@ def get_confirm_kb() -> InlineKeyboardMarkup:
 # Кнопки подписаться на канал
 def get_main_menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text='🧠 Что я умею', callback_data=f'{CB.INFO_TEXT.value}:1:com_start')
+    kb.button(text='🧠 Что я умею', callback_data=f'{CB.HELP_TEXT.value}:1:com_start')
     kb.button(text='💳 Тарифы и доступ', callback_data=f'{CB.PAYMENT_START.value}')
     kb.button(text='🚀 Начать работать', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
-    kb.button(text='⚙️ Помощь', callback_data=f'{CB.INFO_START.value}')
+    kb.button(text='⚙️ Помощь', callback_data=f'{CB.HELP_START.value}')
 
     return kb.adjust(1).as_markup()
 
@@ -73,7 +73,7 @@ def get_payment_kb(tariffs: list[db.Tariff]) -> InlineKeyboardMarkup:
 def get_info_menu_kb(info: list[db.Info]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     for i in info:
-        kb.button(text=i.name, callback_data=f'{CB.INFO_TEXT.value}:{i.id}:{CB.INFO_START.value}')
+        kb.button(text=i.name, callback_data=f'{CB.HELP_TEXT.value}:{i.id}:{CB.HELP_START.value}')
     kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
 
     return kb.adjust(1).as_markup()

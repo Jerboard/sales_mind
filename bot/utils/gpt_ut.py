@@ -14,7 +14,7 @@ from settings import log_error
 
 
 def parse_gpt_answer(text: str) -> str:
-    text = text.replace('<br>', '\n')
+    text = text.replace('<br>', '\n').replace('```html', '')
     unwanted = ['<ul>', '</ul>', '<li>', '</li>',]
     for token in unwanted:
         text = text.replace(token, '')

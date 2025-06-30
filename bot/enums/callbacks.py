@@ -6,8 +6,8 @@ class CB(Enum):
     COM_START = 'com_start'
     ACCEPT = 'accept'
 
-    INFO_START = 'info_start'
-    INFO_TEXT = 'info_text'
+    HELP_START = 'help_start'
+    HELP_TEXT = 'help_text'
 
     PAYMENT_START = 'payment_start'
     PAYMENT_TARIFF = 'payment_tariff'

@@ -10,7 +10,23 @@ import utils as ut
 import db
 from settings import conf, log_error
 from init import client_router, bot
-from enums import CB, MenuCommand, Action
+from enums import CB, HandlerKey, Action
+
+
+@client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_START.value))
+async def gpt_start_cb(cb: CallbackQuery, state: FSMContext):
+    _, action = cb.data.split(':')
+
+    if action == Action.EDIT.value:
+        await ut.send_gpt_start(cb.from_user.id, msg_id=cb.message.message_id)
+    else:
+        await ut.send_gpt_start(cb.from_user.id)
+
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=cb.from_user.id,
+        action=HandlerKey.GPT_START_CB.key,
+    )
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_CATEGORY.value))
@@ -21,14 +37,17 @@ async def gpt_category(cb: CallbackQuery, state: FSMContext):
 
     prompts = await db.Prompt.get_prompt_category(category_id)
 
-    text = '✅ Выбери нужный сценарий'
+    text = await db.Text.get_text(HandlerKey.GPT_CATEGORY.key)
     markup = kb.get_prompt_kb(prompts)
-
     await cb.message.edit_text(text, reply_markup=markup)
 
-    # if action == Action.EDIT.value:
-    # else:
-    #     await cb.message.answer(text, reply_markup=markup)
+    category = await db.PromptCategory.get_by_id(category_id)
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=cb.from_user.id,
+        action=HandlerKey.GPT_CATEGORY.key,
+        comment=f'{category.name}'
+    )
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_PROMPT.value))
@@ -48,11 +67,20 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
             'prompt': prompt,
         }
     )
-    text = (
-        f'👉 Составь свой запрос\n\n'
-        f'{prompt.hint}'
-    )
+    text = await db.Text.get_text(HandlerKey.GPT_PROMPT.key)
+    text += f'\n\n{prompt.hint}'
+    # text = (
+    #     f'👉 Составь свой запрос\n\n'
+    #     f'{prompt.hint}'
+    # )
     await cb.message.edit_text(text, reply_markup=kb.get_back_kb(cb=CB.GPT_CATEGORY.value, value=prompt.category_id))
+
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=cb.from_user.id,
+        action=HandlerKey.GPT_PROMPT.key,
+        comment=f'{prompt.name}'
+    )
 
 
 # сам запрос
@@ -60,25 +88,39 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
 async def gpt_prompt_msg(msg: Message, state: FSMContext):
     data = await state.get_data()
 
-    await ut.send_gpt_answer(
+    message_id = await ut.send_gpt_answer(
         user_id=msg.from_user.id,
         user_prompt=msg.text,
         prompt_id=data.get('prompt_id')
     )
 
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=msg.from_user.id,
+        action=HandlerKey.GPT_PROMPT_MSG.key,
+        msg_id=message_id
+    )
+
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_REPEAT.value))
-async def gpt_rate(cb: CallbackQuery, state: FSMContext):
+async def gpt_repeat(cb: CallbackQuery, state: FSMContext):
     _, answer_id_str = cb.data.split(':')
     answer_id = int(answer_id_str)
 
     answer = await db.Message.get_by_id(answer_id)
     prompt = 'Предложи ещё варианты по предидущему запросу'
 
-    await ut.send_gpt_answer(
+    message_id = await ut.send_gpt_answer(
         user_id=cb.from_user.id,
         user_prompt=prompt,
         prompt_id=answer.prompt_id
+    )
+
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=cb.from_user.id,
+        action=HandlerKey.GPT_REPEAT.key,
+        msg_id=message_id
     )
 
 
@@ -98,7 +140,10 @@ async def gpt_rate(cb: CallbackQuery, state: FSMContext):
     # 2. Приписываем свежую
     text = f'{text}\n\n{answer_rate}'
     await db.Message.update(message_id=msg_id, is_like=rate)
-    await cb.answer('Оценка поставлена')
+
+    text_answer = await db.Text.get_text(HandlerKey.GPT_RATE.key)
+    await cb.answer(text_answer)
+
     try:
         await cb.message.edit_text(
             text=text,
@@ -106,5 +151,14 @@ async def gpt_rate(cb: CallbackQuery, state: FSMContext):
             parse_mode=None,
             reply_markup=kb.get_new_query_kb(msg_id)
         )
-    except:
-        pass
+    except Exception as e:
+        log_error(e)
+        answer_rate += f' ❗️Ошибка: {e}'
+
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=cb.from_user.id,
+        action=HandlerKey.GPT_RATE.key,
+        comment=answer_rate,
+        msg_id=msg_id
+    )

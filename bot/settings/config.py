@@ -8,12 +8,15 @@ class Config:
 
     if debug:
         token = os.getenv("TOKEN_TEST")
-        pay_key = os.getenv("PAY_KEY_TEST")
-        wallet_id = os.getenv("WALLET_ID_TEST")
     else:
         token = os.getenv("TOKEN")
-        pay_key = os.getenv("PAY_KEY_TEST")
-        wallet_id = os.getenv("WALLET_ID_TEST")
+
+    gpt_token = os.getenv('GPT_TOKEN')
+
+    pay_key = os.getenv("PAY_KEY_TEST")
+    wallet_id = os.getenv("WALLET_ID_TEST")
+    secret_1 = os.getenv('SECRET_1')
+    secret_2 = os.getenv('SECRET_2')
 
     db_host = os.getenv('DB_HOST')
     db_port = os.getenv('DB_PORT')
@@ -27,8 +30,6 @@ class Config:
     date_format = '%d.%m.%Y'
     time_format = '%H:%M'
     datetime_format = '%H:%M %d.%m.%Y'
-
-    gpt_token = os.getenv('GPT_TOKEN')
 
 
 conf = Config()

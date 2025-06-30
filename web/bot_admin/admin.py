@@ -2,7 +2,8 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
-from .models import User, LogsError, PromptCategory, Prompt, Message, Tariff, Info
+from .models import User, LogsError, PromptCategory, Prompt, Message, Tariff, Info, LogsUser, Text
+from web.settings import DEBUG
 
 
 # ────────── inlines ──────────
@@ -83,3 +84,30 @@ class InfoAdmin(ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
     ordering = ("-updated_at",)
 
+
+@admin.register(LogsUser)
+class LogsUserAdmin(ModelAdmin):
+    list_display = ("created_at", "user", "action", "msg", "comment")
+    readonly_fields = ("id", "user", "action", "msg", "created_at", "updated_at")
+    # list_editable = ("comment",)
+    search_fields = ("user__id", "action")
+    list_filter = ("action",)
+    ordering = ("-created_at",)
+
+
+@admin.register(Text)
+class InfoKeyAdmin(ModelAdmin):
+    list_display = ("key", "text", "updated_at")
+    readonly_fields = ["id", "created_at", "updated_at"]
+    list_editable = ("text",)
+    ordering = ("id",)
+
+    if not DEBUG:
+        readonly_fields.append('key')
+
+        # **Блокируем добавление и удаление через админку**
+        def has_add_permission(self, request):
+            return False
+
+        def has_delete_permission(self, request, obj=None):
+            return False
