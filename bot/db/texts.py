@@ -24,7 +24,10 @@ class Text(Base):
 
         async with begin_connection() as conn:
             result = await conn.execute(query)
-            text = result.scalars().first().text
-            cls._cache[key] = text
+            result = result.scalars().first()
 
-        return text if text else f'‼️ Нет текста  ключ: {key}'
+        if result:
+            cls._cache[key] = result.text
+            return result.text
+        else:
+            return f'‼️ Нет текста  ключ: {key}'
