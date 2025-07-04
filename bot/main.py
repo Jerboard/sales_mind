@@ -12,11 +12,14 @@ from db.base import init_models
 from handlers.main_menu import main_router
 from handlers.exceptions import error_router
 from handlers import client_router
+from middlewares import BanCheckMiddleware
 
 # from handlers.exceptions import error_router
 
 
 dp = Dispatcher()
+dp.message.middleware(BanCheckMiddleware())
+dp.callback_query.middleware(BanCheckMiddleware())
 
 
 async def main() -> None:

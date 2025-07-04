@@ -24,6 +24,7 @@ class User(models.Model):
     subscription_end = models.DateTimeField(null=True, blank=True, verbose_name="Окончание подписки")
     requests_remaining = models.IntegerField(default=0, verbose_name="Осталось запросов")
     is_accepted = models.BooleanField(verbose_name="Принял правила", default=False)
+    is_ban = models.BooleanField(verbose_name="Заблокирован", default=False)
 
     class Meta:
         db_table = "users"

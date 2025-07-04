@@ -19,6 +19,7 @@ class User(Base):
     requests_remaining: Mapped[int] = mapped_column(sa.Integer, default=False)
 
     is_accepted: Mapped[bool] = mapped_column(sa.Boolean, default=False)
+    is_ban: Mapped[bool] = mapped_column(sa.Boolean, default=False)
 
     @classmethod
     async def add(cls, user_id: int, full_name: str, username: str) -> None:

@@ -18,10 +18,11 @@ class PromptInline(TabularInline):
 # ────────── основные модели ──────────
 @admin.register(User)
 class UserAdmin(ModelAdmin):
-    list_display = ("id", "full_name", "username", "subscription_end", "created_at", "updated_at")
+    list_display = ("id", "full_name", "username", "subscription_end", "is_ban", "created_at", "updated_at")
     search_fields = ("full_name", "username")
     ordering = ("-created_at",)
     readonly_fields = ("created_at", "updated_at")
+    list_editable = ["is_ban"]
 
 
 @admin.register(LogsError)
