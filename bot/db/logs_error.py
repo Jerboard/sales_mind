@@ -15,6 +15,7 @@ class LogsError(Base):
     # user_id: Mapped[int] = mapped_column(sa.ForeignKey("users.id"))
     # created_at: Mapped[datetime] = mapped_column(sa.DateTime(), default=sa.func.now())
 
+    user_id: Mapped[int] = mapped_column(sa.ForeignKey("users.id"), nullable=True)
     traceback: Mapped[str] = mapped_column(sa.Text, nullable=True)
     message: Mapped[str] = mapped_column(sa.Text, nullable=True)
     comment: Mapped[str] = mapped_column(sa.String, nullable=True)

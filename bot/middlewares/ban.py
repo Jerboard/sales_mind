@@ -15,7 +15,7 @@ class BanCheckMiddleware(BaseMiddleware):
 
         if user_id:
             user = await db.User.get_by_id(user_id)
-            if user.is_ban:
+            if user and user.is_ban:
                 text = f'❌ Вам закрыт доступ'
                 if isinstance(event, Message):
                     await event.answer(text)
