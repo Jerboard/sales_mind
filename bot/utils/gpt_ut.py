@@ -12,6 +12,13 @@ import db
 from init import client_openai
 from settings import log_error
 
+SAFE_MODELS = {
+    "gpt-4o", "gpt-4o-mini",
+    "gpt-4-turbo", "gpt-4.1", "gpt-4.1-mini",
+    "o3-pro", "o3", "o4-mini",
+    "gpt-3.5-turbo", "gpt-3.5-turbo-0125",
+}
+
 
 def parse_gpt_answer(text: str) -> str:
     text = text.replace('<br>', '\n').replace('```html', '')
@@ -26,7 +33,7 @@ def telegram_sanitize(html: str) -> str:
     tg_tags = ["b", "strong", "i", "em", "u", "ins", "s", "strike", "del", "code", "pre", "a", "span"]
     tg_attrs = {"a": ["href"], "span": ["class"]}
     tg_attr_filter = {"span": lambda tag, name, value: value == "tg-spoiler"}
-
+    html = html.replace('```html', '')
     return bleach.clean(
         html,
         tags=tg_tags,
@@ -91,14 +98,21 @@ async def ask_gpt(prompt: db.Prompt, history: list[db.Message], user_prompt: str
         # for i in messages:
         #     print(i)
 
-        response = await client_openai.chat.completions.create(
-            model=prompt.model,
-            temperature=prompt.temperature,
-            presence_penalty=prompt.presence_penalty,
-            frequency_penalty=prompt.frequency_penalty,
-            timeout=30,
-            messages=messages
-        )
+        if prompt.model in SAFE_MODELS:
+            response = await client_openai.chat.completions.create(
+                model=prompt.model,
+                temperature=prompt.temperature,
+                presence_penalty=prompt.presence_penalty,
+                frequency_penalty=prompt.frequency_penalty,
+                timeout=30,
+                messages=messages
+            )
+        else:
+            response = await client_openai.chat.completions.create(
+                model=prompt.model,
+                timeout=30,
+                messages=messages
+            )
 
         usage = response.usage.dict()
         usage['time_answer'] = str(datetime.now() - time_start)

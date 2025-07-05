@@ -6,6 +6,7 @@ from aiogram.enums.parse_mode import ParseMode
 import re
 import logging
 import time
+import os
 
 import keyboards as kb
 import utils as ut
@@ -16,6 +17,11 @@ from enums import CB, HandlerKey, Action
 
 
 logger = logging.getLogger('gpt_time_logs')
+gpt_log_file = os.path.join('logs', f'time_gpt.log')
+gpt_handler = logging.FileHandler(gpt_log_file, encoding='utf-8')
+gpt_handler.setLevel(logging.WARNING)
+logger.addHandler(gpt_handler)
+logger.setLevel(logging.WARNING)
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_START.value))
@@ -107,7 +113,7 @@ async def gpt_prompt_msg(msg: Message, state: FSMContext):
         msg_id=message_id
     )
 
-    logger.info(f'{message_id}: {time.perf_counter() - t0}')
+    logger.warning(f'{message_id}: {time.perf_counter() - t0}')
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_REPEAT.value))
