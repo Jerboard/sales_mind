@@ -113,7 +113,7 @@ async def gpt_prompt_msg(msg: Message, state: FSMContext):
         msg_id=message_id
     )
 
-    logger.warning(f'{message_id}: {time.perf_counter() - t0:.f2}')
+    logger.warning(f'{message_id}: {time.perf_counter() - t0:.2f}')
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_REPEAT.value))
@@ -138,7 +138,7 @@ async def gpt_repeat(cb: CallbackQuery, state: FSMContext):
         action=HandlerKey.GPT_REPEAT.key,
         msg_id=message_id
     )
-    logger.warning(f'{message_id}: {time.perf_counter() - t0:.f2} repeat')
+    logger.warning(f'{message_id}: {time.perf_counter() - t0:.2f} repeat')
 
 
 
