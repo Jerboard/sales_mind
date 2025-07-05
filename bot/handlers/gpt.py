@@ -4,6 +4,8 @@ from aiogram.filters import StateFilter
 from aiogram.enums.parse_mode import ParseMode
 
 import re
+import logging
+import time
 
 import keyboards as kb
 import utils as ut
@@ -11,6 +13,9 @@ import db
 from settings import conf, log_error
 from init import client_router, bot
 from enums import CB, HandlerKey, Action
+
+
+logger = logging.getLogger('gpt_time_logs')
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_START.value))
@@ -86,6 +91,7 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
 # сам запрос
 @client_router.message(StateFilter(CB.GPT_PROMPT.value))
 async def gpt_prompt_msg(msg: Message, state: FSMContext):
+    t0 = time.perf_counter()
     data = await state.get_data()
 
     message_id = await ut.send_gpt_answer(
@@ -100,6 +106,8 @@ async def gpt_prompt_msg(msg: Message, state: FSMContext):
         action=HandlerKey.GPT_PROMPT_MSG.key,
         msg_id=message_id
     )
+
+    logger.info(f'{message_id}: {time.perf_counter() - t0}')
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_REPEAT.value))
