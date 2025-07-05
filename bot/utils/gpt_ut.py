@@ -33,7 +33,7 @@ def telegram_sanitize(html: str) -> str:
     tg_tags = ["b", "strong", "i", "em", "u", "ins", "s", "strike", "del", "code", "pre", "a", "span"]
     tg_attrs = {"a": ["href"], "span": ["class"]}
     tg_attr_filter = {"span": lambda tag, name, value: value == "tg-spoiler"}
-    html = html.replace('```html', '')
+    html = html.replace('```html', '').replace('```', '')
     return bleach.clean(
         html,
         tags=tg_tags,
