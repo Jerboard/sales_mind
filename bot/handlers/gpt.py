@@ -47,12 +47,13 @@ async def gpt_category(cb: CallbackQuery, state: FSMContext):
     category_id = int(category_id_str)
 
     prompts = await db.Prompt.get_prompt_category(category_id)
+    category = await db.PromptCategory.get_by_id(category_id)
 
     text = await db.Text.get_text(HandlerKey.GPT_CATEGORY.key)
+    text = text.format(category=category.name)
     markup = kb.get_prompt_kb(prompts)
     await cb.message.edit_text(text, reply_markup=markup)
 
-    category = await db.PromptCategory.get_by_id(category_id)
     # сохраняем действия пользователя
     await db.LogsUser.add(
         user_id=cb.from_user.id,
@@ -63,12 +64,12 @@ async def gpt_category(cb: CallbackQuery, state: FSMContext):
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_PROMPT.value))
 async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
-    await state.clear()
 
     _, prompt_id_str = cb.data.split(':')
     prompt_id = int(prompt_id_str)
 
-    prompt = await db.Prompt.get_by_id(prompt_id)
+    # prompt = await db.Prompt.get_by_id(prompt_id)
+    prompt = await db.Prompt.get_prompt_with_category(prompt_id)
 
     await state.set_state(CB.GPT_PROMPT.value)
     await state.update_data(
@@ -79,11 +80,9 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
         }
     )
     text = await db.Text.get_text(HandlerKey.GPT_PROMPT.key)
+    text = text.format(category=prompt.prompt_category.name, prompt_name=prompt.name)
     text += f'\n\n{prompt.hint}'
-    # text = (
-    #     f'👉 Составь свой запрос\n\n'
-    #     f'{prompt.hint}'
-    # )
+
     await cb.message.edit_text(text, reply_markup=kb.get_back_kb(cb=CB.GPT_CATEGORY.value, value=prompt.category_id))
 
     # сохраняем действия пользователя
