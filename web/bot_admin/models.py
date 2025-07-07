@@ -183,6 +183,7 @@ class LogsUser(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
     user = models.ForeignKey("User", on_delete=models.CASCADE, verbose_name="Пользователь")
     action = models.CharField(max_length=255, verbose_name="Действие", choices=HANDLER_KEY_CHOICES)
+    session = models.CharField(max_length=255, verbose_name="Сессия", null=True, blank=True)
     comment = models.TextField(verbose_name="Комментарий", null=True, blank=True)
     msg = models.ForeignKey("Message", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Ответ ГПТ")
 

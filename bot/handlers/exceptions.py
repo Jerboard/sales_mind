@@ -3,16 +3,25 @@ from aiogram.types import ErrorEvent, Message, CallbackQuery
 from init import error_router
 from settings import log_error, conf
 import utils as ut
-from db import LogsError
+import db
+
+from enums import HandlerKey
 
 
 if not conf.debug:
     @error_router.errors()
-    async def error_handler(ex: ErrorEvent):
+    async def error_handler(ex: ErrorEvent, session_id: str):
         tb, msg = log_error (ex)
         user_id = ex.update.message.from_user.id if ex.update.message else None
 
-        await LogsError.add(user_id=user_id, traceback=tb, message=msg)
+        await db.LogsError.add(user_id=user_id, traceback=tb, message=msg)
+
+        if user_id:
+            await db.LogsUser.add(
+                user_id=user_id,
+                action=HandlerKey.ERROR.key,
+                session=session_id
+            )
 
 
 @error_router.message()

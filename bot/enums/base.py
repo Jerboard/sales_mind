@@ -49,6 +49,8 @@ class HandlerKey(Enum):
     HELP_START_CB = ('gpt_help_msg', 'Помощь (кнопка)')
     HELP_TEXT = ('help_text', 'Помощь текст')
 
+    ERROR = ('error', 'Ошибка')
+
     def __init__(self, key, label):
         self.key = key
         self.label = label

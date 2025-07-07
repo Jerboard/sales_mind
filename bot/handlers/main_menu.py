@@ -11,7 +11,7 @@ from enums import CB, MenuCommand, Action, HandlerKey
 
 
 @main_router.message(CommandStart())
-async def com_start(msg: Message, state: FSMContext):
+async def com_start(msg: Message, state: FSMContext, session_id: str):
     await state.clear()
 
     await db.User.add(msg.from_user.id, msg.from_user.full_name, msg.from_user.username)
@@ -29,22 +29,24 @@ async def com_start(msg: Message, state: FSMContext):
     await db.LogsUser.add(
         user_id=msg.from_user.id,
         action=HandlerKey.COM_START.key,
+        session=session_id
     )
 
 
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.COM_START.value))
-async def back_start(cb: CallbackQuery, state: FSMContext):
+async def back_start(cb: CallbackQuery, state: FSMContext, session_id: str):
     await ut.send_main_menu(user_id=cb.from_user.id, msg_id=cb.message.message_id)
 
     # сохраняем действия пользователя
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.BACK_START.key,
+        session=session_id
     )
 
 
 @main_router.callback_query(lambda cb: cb.data.startswith(CB.ACCEPT.value))
-async def accept(cb: CallbackQuery, state: FSMContext):
+async def accept(cb: CallbackQuery, state: FSMContext, session_id: str):
     await db.User.update(user_id=cb.from_user.id, is_accepted=True)
 
     await ut.send_main_menu(user_id=cb.from_user.id, msg_id=cb.message.message_id)
@@ -53,11 +55,12 @@ async def accept(cb: CallbackQuery, state: FSMContext):
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.ACCEPT.key,
+        session=session_id
     )
 
 
 @main_router.message(Command(MenuCommand.GPT.command))
-async def gpt_start_msg(msg: Message, state: FSMContext):
+async def gpt_start_msg(msg: Message, state: FSMContext, session_id: str):
     await state.clear()
 
     user = await db.User.get_by_id(msg.from_user.id)
@@ -74,11 +77,12 @@ async def gpt_start_msg(msg: Message, state: FSMContext):
     await db.LogsUser.add(
         user_id=msg.from_user.id,
         action=HandlerKey.GPT_START_MSG.key,
+        session=session_id
     )
 
 
 @main_router.message(Command(MenuCommand.PRICE.command))
-async def pay_start_msg(msg: Message, state: FSMContext):
+async def pay_start_msg(msg: Message, state: FSMContext, session_id: str):
     await state.clear()
 
     await ut.send_payment_start(user_id=msg.from_user.id)
@@ -87,11 +91,12 @@ async def pay_start_msg(msg: Message, state: FSMContext):
     await db.LogsUser.add(
         user_id=msg.from_user.id,
         action=HandlerKey.PAY_START_MSG.key,
+        session=session_id
     )
 
 
 @main_router.message(Command(MenuCommand.HELP.command))
-async def gpt_help_msg(msg: Message, state: FSMContext):
+async def gpt_help_msg(msg: Message, state: FSMContext, session_id: str):
     await state.clear()
 
     await ut.send_info_start(user_id=msg.from_user.id)
@@ -100,4 +105,5 @@ async def gpt_help_msg(msg: Message, state: FSMContext):
     await db.LogsUser.add(
         user_id=msg.from_user.id,
         action=HandlerKey.HELP_START_MSG.key,
+        session=session_id
     )

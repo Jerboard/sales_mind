@@ -4,6 +4,7 @@ from aiogram.types import TelegramObject, Message, CallbackQuery
 import db
 
 
+# проверяет блокированных пользователей
 class BanCheckMiddleware(BaseMiddleware):
     async def __call__(self, handler, event: TelegramObject, data: dict):
         # Проверяем, что событие - это сообщение

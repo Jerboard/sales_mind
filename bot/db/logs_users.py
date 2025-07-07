@@ -14,11 +14,12 @@ class LogsUser(Base):
     user_id: Mapped[int] = mapped_column(sa.ForeignKey("users.id"))
     action: Mapped[str] = mapped_column(sa.String)
     comment: Mapped[str] = mapped_column(sa.Text, nullable=True)
+    session: Mapped[str] = mapped_column(sa.String, nullable=True)
     msg_id: Mapped[int] = mapped_column(sa.ForeignKey("messages.id"), nullable=True)
 
     @classmethod
-    async def add(cls, user_id: int, action: str, comment: str = None, msg_id: int = None) -> None:
-        query = sa.insert(cls).values(user_id=user_id, action=action)
+    async def add(cls, user_id: int, action: str, session: str, comment: str = None, msg_id: int = None) -> None:
+        query = sa.insert(cls).values(user_id=user_id, action=action, session=session)
 
         if comment:
             query = query.values(comment=comment)

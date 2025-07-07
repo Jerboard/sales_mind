@@ -25,7 +25,7 @@ logger.setLevel(logging.WARNING)
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_START.value))
-async def gpt_start_cb(cb: CallbackQuery, state: FSMContext):
+async def gpt_start_cb(cb: CallbackQuery, state: FSMContext, session_id: str):
     _, action = cb.data.split(':')
 
     if action == Action.EDIT.value:
@@ -37,11 +37,12 @@ async def gpt_start_cb(cb: CallbackQuery, state: FSMContext):
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.GPT_START_CB.key,
+        session=session_id
     )
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_CATEGORY.value))
-async def gpt_category(cb: CallbackQuery, state: FSMContext):
+async def gpt_category(cb: CallbackQuery, state: FSMContext, session_id: str):
     await state.clear()
     _, category_id_str = cb.data.split(':')
     category_id = int(category_id_str)
@@ -58,12 +59,13 @@ async def gpt_category(cb: CallbackQuery, state: FSMContext):
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.GPT_CATEGORY.key,
-        comment=f'{category.name}'
+        comment=f'{category.name}',
+        session=session_id
     )
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_PROMPT.value))
-async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
+async def gpt_prompt(cb: CallbackQuery, state: FSMContext, session_id: str):
 
     _, prompt_id_str = cb.data.split(':')
     prompt_id = int(prompt_id_str)
@@ -89,13 +91,14 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext):
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.GPT_PROMPT.key,
-        comment=f'{prompt.name}'
+        comment=f'{prompt.name}',
+        session=session_id
     )
 
 
 # сам запрос
 @client_router.message(StateFilter(CB.GPT_PROMPT.value))
-async def gpt_prompt_msg(msg: Message, state: FSMContext):
+async def gpt_prompt_msg(msg: Message, state: FSMContext, session_id: str):
     t0 = time.perf_counter()
     data = await state.get_data()
 
@@ -109,14 +112,15 @@ async def gpt_prompt_msg(msg: Message, state: FSMContext):
     await db.LogsUser.add(
         user_id=msg.from_user.id,
         action=HandlerKey.GPT_PROMPT_MSG.key,
-        msg_id=message_id
+        msg_id=message_id,
+        session=session_id
     )
 
     logger.warning(f'{message_id}: {time.perf_counter() - t0:.2f}')
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_REPEAT.value))
-async def gpt_repeat(cb: CallbackQuery, state: FSMContext):
+async def gpt_repeat(cb: CallbackQuery, state: FSMContext, session_id: str):
     t0 = time.perf_counter()
 
     _, answer_id_str = cb.data.split(':')
@@ -135,14 +139,15 @@ async def gpt_repeat(cb: CallbackQuery, state: FSMContext):
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.GPT_REPEAT.key,
-        msg_id=message_id
+        msg_id=message_id,
+        session=session_id
     )
     logger.warning(f'{message_id}: {time.perf_counter() - t0:.2f} repeat')
 
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_RATE.value))
-async def gpt_rate(cb: CallbackQuery, state: FSMContext):
+async def gpt_rate(cb: CallbackQuery, state: FSMContext, session_id: str):
     _, msg_id_str, rate_str = cb.data.split(':')
     msg_id = int(msg_id_str)
     rate = bool(int(rate_str))
@@ -177,5 +182,6 @@ async def gpt_rate(cb: CallbackQuery, state: FSMContext):
         user_id=cb.from_user.id,
         action=HandlerKey.GPT_RATE.key,
         comment=answer_rate,
-        msg_id=msg_id
+        msg_id=msg_id,
+        session=session_id
     )

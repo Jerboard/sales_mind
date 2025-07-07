@@ -14,18 +14,19 @@ from enums import CB, HandlerKey, Action
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.PAYMENT_START.value))
-async def pay_start_cb(cb: CallbackQuery, state: FSMContext):
+async def pay_start_cb(cb: CallbackQuery, state: FSMContext, session_id: str):
     await ut.send_payment_start(user_id=cb.from_user.id, msg_id=cb.message.message_id)
 
     # сохраняем действия пользователя
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.PAY_START_CB.key,
+        session=session_id
     )
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.PAYMENT_TARIFF.value))
-async def payment_url(cb: CallbackQuery, state: FSMContext):
+async def payment_url(cb: CallbackQuery, state: FSMContext, session_id: str):
     _, tariff_id_str = cb.data.split(':')
     tariff_id = int(tariff_id_str)
 
@@ -43,7 +44,8 @@ async def payment_url(cb: CallbackQuery, state: FSMContext):
     await db.LogsUser.add(
         user_id=cb.from_user.id,
         action=HandlerKey.PAYMENT_URL.key,
-        comment=f'Тариф {tariff.name}'
+        comment=f'Тариф {tariff.name}',
+        session=session_id
     )
 
 

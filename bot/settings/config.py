@@ -18,6 +18,11 @@ class Config:
     secret_1 = os.getenv('SECRET_1')
     secret_2 = os.getenv('SECRET_2')
 
+    # Redis connection settings REDIS_HOST
+    redis_host = os.getenv("REDIS_HOST")
+    redis_port = int(os.getenv("REDIS_PORT"))
+    session_ttl = 3600  # 1 hour in seconds
+
     db_host = os.getenv('DB_HOST')
     db_port = os.getenv('DB_PORT')
     db_name = os.getenv('POSTGRES_DB')

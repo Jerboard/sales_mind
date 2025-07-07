@@ -4,7 +4,7 @@ from aiogram import Bot
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 
-
+import redis.asyncio as redis
 import asyncio
 import uvloop
 
@@ -25,6 +25,8 @@ bot = Bot(
 
 
 client_openai = AsyncOpenAI()
+
+client_redis = redis.Redis(host=conf.redis_host, port=conf.redis_port, db=0, decode_responses=True)
 
 main_router = Router()
 client_router = Router()
