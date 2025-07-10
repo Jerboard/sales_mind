@@ -88,9 +88,11 @@ class InfoAdmin(ModelAdmin):
 
 @admin.register(LogsUser)
 class LogsUserAdmin(ModelAdmin):
+    change_list_template = "bot_admin/log_error_statistic.html"
+    # list_before_template = "bot_admin/log_error_statistic.html"
+
     list_display = ("created_at", "user", "action", "msg", "comment")
     readonly_fields = ("id", "user", "action", "msg", "created_at", "updated_at", "session")
-    # list_editable = ("comment",)
     search_fields = ("user__id", "action")
     list_filter = ("action",)
     ordering = ("-created_at",)

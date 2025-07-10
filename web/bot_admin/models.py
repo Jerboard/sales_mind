@@ -1,7 +1,14 @@
 from django.db import models
 from django.utils.safestring import mark_safe
+from datetime import datetime, timedelta
+from django.db.models import Count, Q
 
-from enums import HANDLER_KEY_CHOICES
+import logging
+
+from enums import HANDLER_KEY_CHOICES, HANDLER_KEY_DICT
+
+
+logger = logging.getLogger(__name__)
 
 
 help_text_for_text = mark_safe(
@@ -194,6 +201,91 @@ class LogsUser(models.Model):
 
     def __str__(self):
         return f"{self.user} — {self.action}"
+
+
+    def get_unique_users(self, period: str = None) -> int:
+        logger.warning(f'period: {period}')
+        """
+        period: 'day', 'week' или 'month'
+        """
+        now = datetime.now()
+        if period == 'day':
+            since = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'week':
+            since = now - timedelta(days=7)
+        elif period == 'month':
+            since = now - timedelta(days=30)
+        elif period == 'active':
+            since = now - timedelta(days=3)
+        else:
+            return LogsUser.objects.values('user').distinct().count()
+
+        return (
+            LogsUser.objects
+                .filter(created_at__gte=since)
+                .values('user')
+                .distinct()
+                .count()
+        )
+
+    def get_users_with_multiple_sessions(self) -> int:
+        """
+        Считает уникальных пользователей у которых distinct(session) > 1
+        за указанный период: 'day', 'week' или 'month'.
+        """
+
+        return (
+            LogsUser.objects
+            .values('user')
+            .annotate(session_count=Count('session', distinct=True))
+            .filter(session_count__gt=1)
+            .count()
+        )
+
+    def get_percent_multiple_sessions(self, all_users_count: int,  multisession_users_count: int = None) -> float:
+        """
+        Процент пользователей с >1 сессией за заданный период.
+        Возвращает число в формате float (например, 12.5 для 12.5%).
+        """
+        if not multisession_users_count:
+            multisession_users_count = self.get_users_with_multiple_sessions()
+        return round(multisession_users_count / all_users_count * 100, 2)
+
+    def get_total_messages(self) -> int:
+        """
+        Общее число логов с msg (сообщениями) за период.
+        """
+        return LogsUser.objects.count()
+
+    def get_avg_messages_per_session(self, total_msg: int) -> float:
+        """
+        Среднее число сообщений на одну сессию за период.
+        """
+        # считаем число уникальных сессий, где session не пустой
+        sessions = (
+            LogsUser.objects
+            .filter(~Q(session=None))
+            .values('session')
+            .distinct()
+            .count()
+        )
+        if sessions == 0:
+            return 0.0
+        return round(total_msg / sessions, 2)
+
+
+    def get_top_actions(self, limit: int = 5):
+        """
+        Возвращает список топ-{limit} action с их количеством за период.
+        """
+        qs = (
+            LogsUser.objects
+                .values('action')
+                .annotate(count=Count('action'))
+                .order_by('-count')[:limit]
+        )
+        # приводим к нужному формату
+        return [{"command": HANDLER_KEY_DICT.get(item["action"]), "count": item["count"]} for item in qs]
 
 
 class Text(models.Model):

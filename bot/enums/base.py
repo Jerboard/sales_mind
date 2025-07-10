@@ -58,3 +58,4 @@ class HandlerKey(Enum):
 
 # Кортеж кортежей для Django choices
 HANDLER_KEY_CHOICES = tuple((member.key, member.label) for member in HandlerKey)
+HANDLER_KEY_DICT = {member.key: member.label for member in HandlerKey}

@@ -4,11 +4,9 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECRET_KEY = os.getenv('DJANGO_KEY')
-SECRET_KEY = 'django-insecure-6i0ab%t_g8ao-u!hoer_dzd44@7pyhj%k_uy%&@snhhc@e#d_o'
+SECRET_KEY = os.getenv('DJANGO_KEY')
 
 DEBUG = bool(int(os.getenv('DEBUG')))
-# DEBUG = True
 
 DAY_STR_FORMAT = '%d/%m'
 TIME_STR_FORMAT = '%H:%M'
@@ -22,15 +20,7 @@ if DEBUG:
 else:
     TOKEN_BOT = os.getenv('TOKEN')
 
-if DEBUG:
-    ALLOWED_HOSTS = ['*']
-else:
-    ALLOWED_HOSTS = ['*']
-
-    CSRF_TRUSTED_ORIGINS = []
-
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'unfold',
@@ -59,7 +49,7 @@ ROOT_URLCONF = 'web.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

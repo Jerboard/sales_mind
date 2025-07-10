@@ -1,0 +1,72 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block result_list %}
+<!-- <div class="my-stats-card bg-white shadow rounded p-4 mb-4"> -->
+<div class="bg-white shadow rounded-lg p-6 mb-4">
+  <h2 class="text-xl font-semibold mb-4">Статистика за период</h2>
+
+  <!-- Активные пользователи -->
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="text-center">
+      <div class="text-sm text-gray-500">Активных сегодня</div>
+      <div id="stats-active-day" class="text-2xl font-bold">0</div>
+    </div>
+    <div class="text-center">
+      <div class="text-sm text-gray-500">Активных за неделю</div>
+      <div id="stats-active-week" class="text-2xl font-bold">0</div>
+    </div>
+    <div class="text-center">
+      <div class="text-sm text-gray-500">Активных за месяц</div>
+      <div id="stats-active-month" class="text-2xl font-bold">0</div>
+    </div>
+  </div>
+
+  <!-- Сессии и возвраты + топ-команд -->
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="text-center">
+      <div class="text-sm text-gray-500">Пользователи с &gt;1 сессией</div>
+      <div id="stats-sessions-gt1" class="text-2xl font-bold">0</div>
+    </div>
+    <div class="text-center">
+      <div class="text-sm text-gray-500">Процент возврата</div>
+      <div id="stats-return-rate" class="text-2xl font-bold">0%</div>
+    </div>
+    <div>
+      <div class="text-sm text-gray-500 mb-2">Популярные команды</div>
+      <ul id="stats-top-commands" class="list-disc list-inside text-sm space-y-1">
+        <li>Команда 1 — 0</li>
+        <li>Команда 2 — 0</li>
+        <li>Команда 3 — 0</li>
+        <li>Команда 4 — 0</li>
+        <li>Команда 5 — 0</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Сообщения и проценты -->
+  <div class="grid grid-cols-3 gap-4">
+    <div class="text-center">
+      <div class="text-sm text-gray-500">Отправлено сообщений</div>
+      <div class="text-2xl font-bold">
+        Всего: <span id="stats-messages-total">0</span>
+      </div>
+      <div class="text-sm text-gray-500">
+        Среднее: <span id="stats-messages-avg">0</span>
+      </div>
+    </div>
+    <div class="text-center">
+      <div class="text-sm text-gray-500">% активных</div>
+      <div id="stats-percent-active" class="text-2xl font-bold">0%</div>
+    </div>
+    <div class="text-center">
+      <div class="text-sm text-gray-500">% подписчиков</div>
+      <div id="stats-percent-subscribers" class="text-2xl font-bold">0%</div>
+    </div>
+  </div>
+</div>
+  {{ block.super }}
+
+
+<script src="{% static 'js/admin_stats.js' %}"></script>
+ {% endblock %}
