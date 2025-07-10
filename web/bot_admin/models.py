@@ -32,6 +32,7 @@ class User(models.Model):
     requests_remaining = models.IntegerField(default=0, verbose_name="Осталось запросов")
     is_accepted = models.BooleanField(verbose_name="Принял правила", default=False)
     is_ban = models.BooleanField(verbose_name="Заблокирован", default=False)
+    is_used_trial = models.BooleanField(verbose_name="Использовал пробный", default=False)
 
     class Meta:
         db_table = "users"
@@ -302,3 +303,21 @@ class Text(models.Model):
 
     def __str__(self):
         return f'{self.key}'
+
+
+class Payment(models.Model):
+    id = models.BigAutoField(primary_key=True, verbose_name="ID")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
+    user = models.ForeignKey("User", on_delete=models.CASCADE, verbose_name="Пользователь")
+    tariff = models.ForeignKey("Tariff", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Тариф")
+    amount = models.FloatField(verbose_name="Сумма")
+    payment_id = models.CharField(max_length=255, verbose_name="ID платежа")
+
+    class Meta:
+        db_table = "payments"
+        verbose_name = "Платёж"
+        verbose_name_plural = "Платежи"
+
+    def __str__(self):
+        return f"{self.user} — {self.amount} ₽"

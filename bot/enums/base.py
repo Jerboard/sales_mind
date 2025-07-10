@@ -44,6 +44,9 @@ class HandlerKey(Enum):
     PAY_START_MSG = ('pay_start_msg', 'Тарифы (команда)')
     PAY_START_CB = ('pay_start_cb', 'Тарифы (кнопка)')
     PAYMENT_URL = ('payment_url', 'Получил ссылку на оплату')
+    PAYMENT_TRY_USED_TRIAL = ('payment_used_trial', 'Повторно пробавл пробный период')
+    PAYMENT_USE_TRIAL = ('PAYMENT_USE_TRIAL', 'Взял пробный период')
+    PAYMENT_SUCCESS = ('payment_success', 'Успешная оплата')
 
     HELP_START_MSG = ('gpt_help_msg', 'Помощь (команда)')
     HELP_START_CB = ('gpt_help_msg', 'Помощь (кнопка)')

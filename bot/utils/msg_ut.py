@@ -1,5 +1,6 @@
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import SuccessfulPayment, CallbackQuery
 from aiogram.fsm.context import FSMContext
+from datetime import datetime, timedelta
 
 import db
 from init import bot
@@ -69,6 +70,7 @@ async def send_gpt_answer(
             log_error(e)
             await sent.edit_text(text=text, parse_mode=None, reply_markup=markup)
 
+        await db.User.update(user_id=user_id, add_requests=-1)
         return message_id
 
     except Exception as e:
@@ -80,6 +82,7 @@ async def send_gpt_answer(
 
 async def send_payment_start(user_id: int, msg_id: int = None):
     tariffs = await db.Tariff.get_all()
+    user = await db.User.get_by_id(user_id)
 
     text = ''
     for tariff in tariffs:
@@ -107,3 +110,24 @@ async def send_info_start(user_id: int, msg_id: int = None):
         await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
     else:
         await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)
+
+
+async def send_success_payment(user_id: int, successful_payment: SuccessfulPayment = None, tariff_id: int = None):
+    tariff = await db.Tariff.get_by_id(tariff_id) if tariff_id else None
+
+    await db.Payment.add(
+        user_id=user_id,
+        tariff_id=tariff_id,
+        payment_id=successful_payment.provider_payment_charge_id if successful_payment else 'trial',
+        amount=successful_payment.total_amount / 100 if successful_payment else 0,
+    )
+
+    response_count = tariff.response_count if tariff_id else 5
+    duration = tariff.duration if tariff else 3
+    subscription_end = datetime.now() + timedelta(days=duration)
+    await db.User.update(
+        user_id=user_id, add_requests=response_count, subscription_end=subscription_end
+    )
+
+    text = await db.Text.get_text(HandlerKey.PAYMENT_SUCCESS.key)
+    await bot.send_message(chat_id=user_id, text=text, reply_markup=kb.get_success_pay_kb())

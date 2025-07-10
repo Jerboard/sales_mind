@@ -2,7 +2,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
-from .models import User, LogsError, PromptCategory, Prompt, Message, Tariff, Info, LogsUser, Text
+from .models import User, LogsError, PromptCategory, Prompt, Message, Tariff, Info, LogsUser, Text, Payment
 from web.settings import DEBUG
 
 
@@ -114,3 +114,12 @@ class InfoKeyAdmin(ModelAdmin):
 
         def has_delete_permission(self, request, obj=None):
             return False
+
+
+@admin.register(Payment)
+class PaymentAdmin(ModelAdmin):
+    list_display = ("id", "user", "tariff", "amount", "payment_id", "created_at")
+    list_filter = ("tariff", "user")
+    search_fields = ("payment_id",)
+    readonly_fields = ("created_at", "updated_at")
+    ordering = ("-created_at",)

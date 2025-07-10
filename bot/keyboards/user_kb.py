@@ -64,6 +64,8 @@ def get_payment_kb(tariffs: list[db.Tariff]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     for tariff in tariffs:
         kb.button(text=tariff.name, callback_data=f'{CB.PAYMENT_TARIFF.value}:{tariff.id}')
+
+    kb.button(text='Попробовать', callback_data=f'{CB.PAYMENT_TARIFF.value}:0')
     kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
 
     return kb.adjust(1).as_markup()
@@ -75,5 +77,21 @@ def get_info_menu_kb(info: list[db.Info]) -> InlineKeyboardMarkup:
     for i in info:
         kb.button(text=i.name, callback_data=f'{CB.HELP_TEXT.value}:{i.id}:{CB.HELP_START.value}')
     kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
+
+    return kb.adjust(1).as_markup()
+
+
+# Инфо кнопки
+def get_success_pay_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text='🚀 Начать работать', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
+
+    return kb.adjust(1).as_markup()
+
+
+# Инфо кнопки
+def get_start_payment_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text='💳 Тарифы и доступ', callback_data=f'{CB.PAYMENT_START.value}')
 
     return kb.adjust(1).as_markup()

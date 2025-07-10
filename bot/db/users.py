@@ -16,10 +16,13 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(sa.String)
     username: Mapped[str] = mapped_column(sa.String, nullable=True)
     subscription_end: Mapped[datetime] = mapped_column(sa.DateTime, nullable=True)
-    requests_remaining: Mapped[int] = mapped_column(sa.Integer, default=False)
+    requests_remaining: Mapped[int] = mapped_column(sa.Integer, default=0)
 
     is_accepted: Mapped[bool] = mapped_column(sa.Boolean, default=False)
     is_ban: Mapped[bool] = mapped_column(sa.Boolean, default=False)
+    is_used_trial: Mapped[bool] = mapped_column(sa.Boolean, default=False)
+
+
 
     @classmethod
     async def add(cls, user_id: int, full_name: str, username: str) -> None:
@@ -45,13 +48,29 @@ class User(Base):
         return result.inserted_primary_key[0]
 
     @classmethod
-    async def update(cls, user_id: int, is_accepted: bool = None) -> None:
+    async def update(
+            cls,
+            user_id: int,
+            add_requests: int = None,
+            subscription_end: datetime = None,
+            is_accepted: bool = None,
+            is_used_trial: bool = None,
+    ) -> None:
         """Обновляет данные"""
         now = datetime.now()
         query = sa.update(cls).where(cls.id == user_id).values(updated_at=now)
 
+        if add_requests:
+            query = query.values(requests_remaining=cls.requests_remaining + add_requests)
+
+        if subscription_end:
+            query = query.values(subscription_end=subscription_end)
+
         if is_accepted is not None:
             query = query.values(is_accepted=is_accepted)
+
+        if is_used_trial is not None:
+            query = query.values(is_used_trial=is_used_trial)
 
         async with begin_connection() as conn:
             await conn.execute(query)
