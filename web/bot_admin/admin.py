@@ -105,15 +105,15 @@ class InfoKeyAdmin(ModelAdmin):
     list_editable = ("text",)
     ordering = ("id",)
 
-    if not DEBUG:
-        readonly_fields.append('key')
-
-        # **Блокируем добавление и удаление через админку**
-        def has_add_permission(self, request):
-            return False
-
-        def has_delete_permission(self, request, obj=None):
-            return False
+    # if not DEBUG:
+    #     readonly_fields.append('key')
+    #
+    #     # **Блокируем добавление и удаление через админку**
+    #     def has_add_permission(self, request):
+    #         return False
+    #
+    #     def has_delete_permission(self, request, obj=None):
+    #         return False
 
 
 @admin.register(Payment)
