@@ -11,7 +11,7 @@ class Config:
         pay_token = os.getenv("YK_PAY_TOKEN_TEST")
     else:
         token = os.getenv("TOKEN")
-        pay_token = os.getenv("YK_PAY_TOKEN_TEST")
+        pay_token = os.getenv("YK_PAY_TOKEN")
 
     gpt_token = os.getenv('GPT_TOKEN')
 
