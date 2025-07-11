@@ -22,15 +22,15 @@ class Prompt(Base):
     presence_penalty: Mapped[float] = mapped_column(sa.Float, default=0.4)
     frequency_penalty: Mapped[float] = mapped_column(sa.Float, default=0.3)
     is_active: Mapped[bool] = mapped_column(sa.Boolean, default=True)
+    ordering: Mapped[int] = mapped_column(sa.Integer, default=1)
 
     prompt_category: Mapped["PromptCategory"] = relationship("PromptCategory", backref="prompt")
-
 
     @classmethod
     async def get_prompt_category(cls, category_id: int) -> t.Optional[list[t.Self]]:
         """Возвращает промпты категории"""
 
-        query = sa.select(cls).where(cls.category_id == category_id, cls.is_active == True)
+        query = sa.select(cls).where(cls.category_id == category_id, cls.is_active == True).order_by(cls.ordering)
 
         async with begin_connection() as conn:
             result = await conn.execute(query)

@@ -5,6 +5,7 @@ from enum import Enum
 class CB(Enum):
     COM_START = 'com_start'
     ACCEPT = 'accept'
+    BALANCE = 'balance'
 
     HELP_START = 'help_start'
     HELP_TEXT = 'help_text'

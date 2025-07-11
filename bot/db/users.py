@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload
-from datetime import datetime, date, time
+from datetime import datetime
 from sqlalchemy.dialects import postgresql as psql
 
 import sqlalchemy as sa
 import typing as t
 
 from .base import Base, begin_connection
+from settings import conf
 
 
 class User(Base):
@@ -22,7 +23,8 @@ class User(Base):
     is_ban: Mapped[bool] = mapped_column(sa.Boolean, default=False)
     is_used_trial: Mapped[bool] = mapped_column(sa.Boolean, default=False)
 
-
+    def subscription_end_str(self):
+        return self.subscription_end.strftime(conf.datetime_format)
 
     @classmethod
     async def add(cls, user_id: int, full_name: str, username: str) -> None:

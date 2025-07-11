@@ -25,6 +25,7 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
     kb.button(text='🧠 Что я умею', callback_data=f'{CB.HELP_TEXT.value}:1:com_start')
     kb.button(text='💳 Тарифы и доступ', callback_data=f'{CB.PAYMENT_START.value}')
     kb.button(text='🚀 Начать работать', callback_data=f'{CB.GPT_START.value}:{Action.EDIT.value}')
+    kb.button(text='📊 Мой баланс', callback_data=f'{CB.BALANCE.value}')
     kb.button(text='⚙️ Помощь', callback_data=f'{CB.HELP_START.value}')
 
     return kb.adjust(1).as_markup()

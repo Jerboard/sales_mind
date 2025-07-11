@@ -1,2 +1,2 @@
-from .ban import BanCheckMiddleware
-from .sessions import SessionMiddleware
+from .ban import OneBigBeautifulMiddleware
+# from .sessions import SessionMiddleware

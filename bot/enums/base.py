@@ -6,6 +6,7 @@ class MenuCommand(Enum):
     START = ('start', '🔄 В начало')
     GPT = ('gpt', '💻 Создать запрос')
     PRICE = ('price', '💳 Тарифы и доступ')
+    BALANCE = ('balance', '📊 Мой баланс')
     HELP = ('help', '⚙️ Помощь')
 
     def __init__(self, command, label):
@@ -28,6 +29,8 @@ class HandlerKey(Enum):
     COM_START = ('com_start', 'Основное меню (команда)')
     BACK_START = ('back_start', 'Основное меню (кнопка назад)')
     ACCEPT = ('accept', 'Принял политику')
+    BALANCE_MSG = ('balance_msg', 'Посмотрел баланс (команда)')
+    BALANCE_CB = ('balance_cb', 'Посмотрел баланс (кнопка)')
 
     GPT_START_MSG = ('gpt_start_msg', 'Перешёл в промпты (команда)')
     GPT_START_CB = ('gpt_start_cb', 'Перешёл в промпты (кнопка)')
@@ -47,12 +50,15 @@ class HandlerKey(Enum):
     PAYMENT_TRY_USED_TRIAL = ('payment_used_trial', 'Повторно пробавл пробный период')
     PAYMENT_USE_TRIAL = ('PAYMENT_USE_TRIAL', 'Взял пробный период')
     PAYMENT_SUCCESS = ('payment_success', 'Успешная оплата')
+    PAYMENT_DISALLOW = ('payment_disallow', 'Не хватает средств')
 
     HELP_START_MSG = ('gpt_help_msg', 'Помощь (команда)')
     HELP_START_CB = ('gpt_help_msg', 'Помощь (кнопка)')
     HELP_TEXT = ('help_text', 'Помощь текст')
 
     ERROR = ('error', 'Ошибка')
+    BAN = ('ban', 'Бан попытка взаимодействия')
+    EMPTY_REQUEST = ('empty_request', 'Запрос без статуса')
 
     def __init__(self, key, label):
         self.key = key

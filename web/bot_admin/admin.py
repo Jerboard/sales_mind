@@ -20,7 +20,7 @@ class PromptInline(TabularInline):
 class UserAdmin(ModelAdmin):
     list_display = ("id", "full_name", "username", "subscription_end", "is_ban", "created_at", "updated_at")
     search_fields = ("full_name", "username")
-    ordering = ("-created_at",)
+    ordering = ("-updated_at",)
     readonly_fields = ("created_at", "updated_at")
     list_editable = ["is_ban"]
 
@@ -37,22 +37,22 @@ class LogsErrorAdmin(ModelAdmin):
 
 @admin.register(PromptCategory)
 class PromptCategoryAdmin(ModelAdmin):
-    list_display = ("name", "is_active", "created_at", "updated_at")
-    list_editable = ("is_active",)
+    list_display = ("name", "is_active", "ordering", "created_at", "updated_at")
+    list_editable = ("is_active", "ordering")
     search_fields = ("name",)
     list_filter = ("is_active",)
-    ordering = ("name",)
+    ordering = ("ordering",)
     inlines = (PromptInline,)
     readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(Prompt)
 class PromptAdmin(ModelAdmin):
-    list_display = ("name", "category", "model", 'role', 'prompt', "is_active", "updated_at")
-    list_editable = ("is_active",)
+    list_display = ("name", "category", "model", 'role', 'prompt', "is_active", "ordering", "updated_at")
+    list_editable = ("is_active", "ordering")
     list_filter = ("is_active", "model", "category")
     search_fields = ("name", "hint", "role", "prompt")
-    ordering = ("-updated_at",)
+    ordering = ("ordering",)
     readonly_fields = ("created_at", "updated_at")
 
 
@@ -68,12 +68,12 @@ class MessageAdmin(ModelAdmin):
 
 @admin.register(Tariff)
 class TariffAdmin(ModelAdmin):
-    list_display = ("id", "name", "description", "price", "is_active", "updated_at")
-    list_editable = ("name", "description", "price", "is_active")
+    list_display = ("id", "name", "description", "price", "is_active", "ordering", "updated_at")
+    list_editable = ("name", "description", "price", "is_active", "ordering")
     list_filter = ("is_active",)
     search_fields = ("name", "description")
     readonly_fields = ("created_at", "updated_at")
-    ordering = ("-updated_at",)
+    ordering = ("ordering",)
 
 
 @admin.register(Info)
@@ -100,20 +100,20 @@ class LogsUserAdmin(ModelAdmin):
 
 @admin.register(Text)
 class InfoKeyAdmin(ModelAdmin):
-    list_display = ("key", "text", "updated_at")
+    list_display = ("key", "text", "ordering", "updated_at")
     readonly_fields = ["id", "created_at", "updated_at"]
-    list_editable = ("text",)
-    ordering = ("id",)
+    list_editable = ("text", "ordering")
+    ordering = ("ordering", "created_at")
 
-    # if not DEBUG:
-    #     readonly_fields.append('key')
-    #
-    #     # **Блокируем добавление и удаление через админку**
-    #     def has_add_permission(self, request):
-    #         return False
-    #
-    #     def has_delete_permission(self, request, obj=None):
-    #         return False
+    if not DEBUG:
+        readonly_fields.append('key')
+
+        # **Блокируем добавление и удаление через админку**
+        def has_add_permission(self, request):
+            return False
+
+        def has_delete_permission(self, request, obj=None):
+            return False
 
 
 @admin.register(Payment)

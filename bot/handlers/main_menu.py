@@ -60,10 +60,10 @@ async def accept(cb: CallbackQuery, state: FSMContext, session_id: str):
 
 
 @main_router.message(Command(MenuCommand.GPT.command))
-async def gpt_start_msg(msg: Message, state: FSMContext, session_id: str):
+async def gpt_start_msg(msg: Message, state: FSMContext, session_id: str, user: db.User):
     await state.clear()
 
-    user = await db.User.get_by_id(msg.from_user.id)
+    # user = await db.User.get_by_id(msg.from_user.id)
 
     # если принял правила то на главную, если нет то принимать
     if not user.is_accepted:
@@ -71,7 +71,7 @@ async def gpt_start_msg(msg: Message, state: FSMContext, session_id: str):
         await msg.answer(text, reply_markup=kb.get_confirm_kb())
         return
 
-    await ut.send_gpt_start(msg.from_user.id)
+    await ut.send_gpt_start(user)
 
     # сохраняем действия пользователя
     await db.LogsUser.add(
@@ -105,5 +105,33 @@ async def gpt_help_msg(msg: Message, state: FSMContext, session_id: str):
     await db.LogsUser.add(
         user_id=msg.from_user.id,
         action=HandlerKey.HELP_START_MSG.key,
+        session=session_id
+    )
+
+
+@main_router.message(Command(MenuCommand.BALANCE.command))
+async def gpt_balance_msg(msg: Message, state: FSMContext, session_id: str, user: db.User):
+    await state.clear()
+
+    await ut.send_balance_start(user=user)
+
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=msg.from_user.id,
+        action=HandlerKey.BALANCE_MSG.key,
+        session=session_id
+    )
+
+
+@main_router.callback_query(lambda cb: cb.data.startswith(CB.BALANCE.value))
+async def gpt_balance_cb(cb: CallbackQuery, state: FSMContext, session_id: str, user: db.User):
+    await state.clear()
+
+    await ut.send_balance_start(user=user, msg_id=cb.message.message_id)
+
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=cb.from_user.id,
+        action=HandlerKey.BALANCE_CB.key,
         session=session_id
     )

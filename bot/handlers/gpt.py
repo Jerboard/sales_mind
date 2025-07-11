@@ -25,13 +25,13 @@ logger.setLevel(logging.WARNING)
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_START.value))
-async def gpt_start_cb(cb: CallbackQuery, state: FSMContext, session_id: str):
+async def gpt_start_cb(cb: CallbackQuery, state: FSMContext, session_id: str, user: db.User):
     _, action = cb.data.split(':')
 
     if action == Action.EDIT.value:
-        await ut.send_gpt_start(cb.from_user.id, msg_id=cb.message.message_id)
+        await ut.send_gpt_start(user, msg_id=cb.message.message_id)
     else:
-        await ut.send_gpt_start(cb.from_user.id)
+        await ut.send_gpt_start(user)
 
     # сохраняем действия пользователя
     await db.LogsUser.add(
@@ -42,7 +42,7 @@ async def gpt_start_cb(cb: CallbackQuery, state: FSMContext, session_id: str):
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_CATEGORY.value))
-async def gpt_category(cb: CallbackQuery, state: FSMContext, session_id: str):
+async def gpt_category(cb: CallbackQuery, state: FSMContext, session_id: str, user: db.User):
     await state.clear()
     _, category_id_str = cb.data.split(':')
     category_id = int(category_id_str)
@@ -51,7 +51,11 @@ async def gpt_category(cb: CallbackQuery, state: FSMContext, session_id: str):
     category = await db.PromptCategory.get_by_id(category_id)
 
     text = await db.Text.get_text(HandlerKey.GPT_CATEGORY.key)
-    text = text.format(category=category.name)
+    text = text.format(
+        category=category.name,
+        requests_remaining=user.requests_remaining,
+        subscription_end=user.subscription_end_str()
+    )
     markup = kb.get_prompt_kb(prompts)
     await cb.message.edit_text(text, reply_markup=markup)
 
@@ -65,7 +69,7 @@ async def gpt_category(cb: CallbackQuery, state: FSMContext, session_id: str):
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_PROMPT.value))
-async def gpt_prompt(cb: CallbackQuery, state: FSMContext, session_id: str):
+async def gpt_prompt(cb: CallbackQuery, state: FSMContext, session_id: str, user: db.User):
 
     _, prompt_id_str = cb.data.split(':')
     prompt_id = int(prompt_id_str)
@@ -82,7 +86,13 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext, session_id: str):
         }
     )
     text = await db.Text.get_text(HandlerKey.GPT_PROMPT.key)
-    text = text.format(category=prompt.prompt_category.name, prompt_name=prompt.name)
+    # text = text.format(category=prompt.prompt_category.name, prompt_name=prompt.name)
+    text = text.format(
+        category=prompt.prompt_category.name,
+        prompt_name=prompt.name,
+        requests_remaining=user.requests_remaining,
+        subscription_end=user.subscription_end_str()
+    )
     text += f'\n\n{prompt.hint}'
 
     await cb.message.edit_text(text, reply_markup=kb.get_back_kb(cb=CB.GPT_CATEGORY.value, value=prompt.category_id))

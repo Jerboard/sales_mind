@@ -12,16 +12,16 @@ from db.base import init_models
 from handlers.main_menu import main_router
 from handlers.exceptions import error_router
 from handlers import client_router
-from middlewares import BanCheckMiddleware, SessionMiddleware
+from middlewares import OneBigBeautifulMiddleware
 
 
 dp = Dispatcher()
-dp.message.middleware(BanCheckMiddleware())
-dp.callback_query.middleware(BanCheckMiddleware())
-
-dp.message.middleware(SessionMiddleware())
-dp.callback_query.middleware(SessionMiddleware())
-dp.errors.middleware(SessionMiddleware())
+dp.message.middleware(OneBigBeautifulMiddleware())
+dp.callback_query.middleware(OneBigBeautifulMiddleware())
+#
+# dp.message.middleware(SessionMiddleware())
+# dp.callback_query.middleware(SessionMiddleware())
+# dp.errors.middleware(SessionMiddleware())
 
 
 async def main() -> None:

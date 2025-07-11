@@ -1,11 +1,8 @@
-  console.log('fffffffffffffffffffffffffffffffff')
 
 
 document.addEventListener('DOMContentLoaded', function() {
   // Путь к вашему API-эндпоинту (меняйте при необходимости)
   const url = '/api/admin_stats';
-
-  console.log('ddddddddddddddddddddddddddddddddd')
 
   fetch(url, {
     credentials: 'same-origin'  // чтобы передавались куки сессии admin

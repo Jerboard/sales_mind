@@ -15,22 +15,28 @@ async def send_main_menu(user: db.User = None, user_id: int = None, msg_id: int 
     text = await db.Text.get_text(HandlerKey.BACK_START.key)
     markup = kb.get_main_menu_kb()
     if msg_id:
-        await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
+        await bot.edit_message_text(
+            chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup, disable_web_page_preview=True
+        )
     else:
-        await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)
+        await bot.send_message(chat_id=user_id, text=text, reply_markup=markup, disable_web_page_preview=True)
 
 
 # старт запроса к гпт
-async def send_gpt_start(user_id: int, msg_id: int = None):
+async def send_gpt_start(user: db.User, msg_id: int = None):
     categories = await db.PromptCategory.get_all()
     text = await db.Text.get_text(HandlerKey.GPT_START_MSG.key)
 
-    # text = '✅ Выбери нужный сценарий'
+    text = text.format(
+        requests_remaining=user.requests_remaining,
+        subscription_end=user.subscription_end_str()
+    )
+
     markup = kb.get_prompt_categories_kb(categories)
     if msg_id:
-        await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
+        await bot.edit_message_text(chat_id=user.id, message_id=msg_id, text=text, reply_markup=markup)
     else:
-        await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)
+        await bot.send_message(chat_id=user.id, text=text, reply_markup=markup)
 
 
 # старт запроса к гпт
@@ -100,7 +106,6 @@ async def send_payment_start(user_id: int, msg_id: int = None):
 
 
 async def send_info_start(user_id: int, msg_id: int = None):
-    text = 'Выбери, что ты хочешь узнать 👇'
     text = await db.Text.get_text(HandlerKey.HELP_START_MSG.key,)
 
     info = await db.Info.get_all()
@@ -110,6 +115,20 @@ async def send_info_start(user_id: int, msg_id: int = None):
         await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
     else:
         await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)
+
+
+async def send_balance_start(user: db.User, msg_id: int = None):
+    text = await db.Text.get_text(HandlerKey.BALANCE_MSG.key)
+    text = text.format(
+        requests_remaining=user.requests_remaining,
+        subscription_end=user.subscription_end_str()
+    )
+
+    markup = kb.get_back_kb()
+    if msg_id:
+        await bot.edit_message_text(chat_id=user.id, message_id=msg_id, text=text, reply_markup=markup)
+    else:
+        await bot.send_message(chat_id=user.id, text=text, reply_markup=markup)
 
 
 async def send_success_payment(user_id: int, successful_payment: SuccessfulPayment = None, tariff_id: int = None):

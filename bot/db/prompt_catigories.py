@@ -13,3 +13,15 @@ class PromptCategory(Base):
 
     name: Mapped[str] = mapped_column(sa.String(255))
     is_active: Mapped[bool] = mapped_column(sa.Boolean, default=True)
+    ordering: Mapped[int] = mapped_column(sa.Integer, default=1)
+
+    @classmethod
+    async def get_all(cls) -> t.Optional[list[t.Self]]:
+        """Возвращает строку по id"""
+
+        query = sa.select(cls).where(cls.is_active == True).order_by(cls.ordering)
+
+        async with begin_connection() as conn:
+            result = await conn.execute(query)
+
+        return result.scalars().all()

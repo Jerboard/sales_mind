@@ -25,11 +25,19 @@ if not conf.debug:
 
 
 @error_router.message()
-async def free_msg_hnd(msg: Message):
+async def free_msg_hnd(msg: Message, user: db.User, session_id: str):
     print(f'free_msg_hnd:\n{msg.content_type}\n{msg.text}')
+    text = await db.Text.get_text(HandlerKey.EMPTY_REQUEST.key)
 
-    await msg.answer('🤷‍♂️ Не понял твоего вопроса, выбери сначала контекст')
-    await ut.send_gpt_start(user_id=msg.from_user.id)
+    await msg.answer(text)
+    await ut.send_gpt_start(user=user)
+
+    # сохраняем действия пользователя
+    await db.LogsUser.add(
+        user_id=msg.from_user.id,
+        action=HandlerKey.EMPTY_REQUEST.key,
+        session=session_id
+    )
 
 
 

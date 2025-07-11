@@ -1,14 +1,16 @@
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from datetime import datetime
+from datetime import datetime, timezone
 
 import db
 import keyboards as kb
+import utils as ut
+from enums import HandlerKey
 
 
 # проверяет блокированных пользователей
-class BanCheckMiddleware(BaseMiddleware):
+class OneBigBeautifulMiddleware(BaseMiddleware):
     async def __call__(self, handler, event: TelegramObject, data: dict):
         # Проверяем, что событие - это сообщение
         user_id = None
@@ -21,21 +23,34 @@ class BanCheckMiddleware(BaseMiddleware):
 
         if user_id:
             user = await db.User.get_by_id(user_id)
+            session_id = await ut.get_or_create_session(event.from_user.id)
+
+            data['session_id'] = session_id
+            data['user'] = user
+
             if user and user.is_ban:
-                text = f'❌ Вам закрыт доступ'
+                text = await db.Text.get_text(HandlerKey.BAN.key)
+
                 if isinstance(event, Message):
                     await event.answer(text)
                 else:
                     await event.message.answer(text)
 
+                # сохраняем действия пользователя
+                await db.LogsUser.add(
+                    user_id=user_id,
+                    action=HandlerKey.PAYMENT_DISALLOW.key,
+                    session=session_id
+                )
+
                 return
 
             state: FSMContext = data.get("state")
             current_state = await state.get_state()
-            # print(f'current_state: {current_state}')
-            # if (cb.startswith('gpt_') or current_state) and (user.requests_remaining == 0 or user.subscription_end < datetime.now()):
-            if (cb.startswith('gpt_') or current_state) and user.requests_remaining == 0:
-                text = f'❌ Увас не осталось запросов'
+            if ((cb.startswith('gpt_') or current_state)
+                    and
+                    (user.requests_remaining == 0 or user.subscription_end < datetime.now(timezone.utc))):
+                text = await db.Text.get_text(HandlerKey.PAYMENT_DISALLOW.key)
                 markup = kb.get_start_payment_kb()
 
                 if isinstance(event, Message):
@@ -43,7 +58,15 @@ class BanCheckMiddleware(BaseMiddleware):
                 else:
                     await event.message.answer(text, reply_markup=markup)
 
+                # сохраняем действия пользователя
+                await db.LogsUser.add(
+                    user_id=user_id,
+                    action=HandlerKey.PAYMENT_DISALLOW.key,
+                    session=session_id
+                )
+
                 return
+
 
 
         return await handler(event, data)

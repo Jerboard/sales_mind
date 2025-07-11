@@ -73,6 +73,7 @@ class PromptCategory(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
     name = models.CharField(max_length=255, verbose_name="Название")
     is_active = models.BooleanField(default=True, verbose_name="Активна")
+    ordering = models.IntegerField(verbose_name="Сортировка", default=1)
 
     class Meta:
         db_table = "prompt_categories"
@@ -111,6 +112,7 @@ class Prompt(models.Model):
         verbose_name="Штраф за повторы", default=0.3, help_text=f'От -2 до 2. Чем выше, больше формулировок (большее 1.3 глючит)'
     )
     is_active = models.BooleanField(default=True, verbose_name="Активен")
+    ordering = models.IntegerField(verbose_name="Сортировка", default=1)
 
     class Meta:
         db_table = "prompts"
@@ -158,6 +160,7 @@ class Tariff(models.Model):
     duration = models.IntegerField(verbose_name="Продолжительность в днях", default=0)
     response_count = models.IntegerField(verbose_name="Количество запросов", default=0)
     is_active = models.BooleanField(default=True, verbose_name="Активна")
+    ordering = models.IntegerField(verbose_name="Сортировка", default=1)
 
     class Meta:
         db_table = "tariffs"
@@ -295,6 +298,7 @@ class Text(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
     key = models.CharField(max_length=255, verbose_name="Ключ")
     text = models.TextField(verbose_name="Текст", help_text=help_text_for_text)
+    ordering = models.IntegerField(verbose_name="Сортировка", default=1)
 
     class Meta:
         db_table = "texts"
