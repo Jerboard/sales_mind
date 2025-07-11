@@ -54,7 +54,7 @@ def get_new_query_kb(message_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text='👍', callback_data=f'{CB.GPT_RATE.value}:{message_id}:1')
     kb.button(text='👎', callback_data=f'{CB.GPT_RATE.value}:{message_id}:0')
-    kb.button(text='🔄 Попробовать другой вариант', callback_data=f'{CB.GPT_REPEAT.value}:{message_id}')
+    kb.button(text='🔂 Ввести запрос заново', callback_data=f'{CB.GPT_REPEAT.value}:{message_id}')
     kb.button(text='💻 Выбрать другой сценарий', callback_data=f'{CB.GPT_START.value}:{Action.NEW.value}')
 
     return kb.adjust(2, 1).as_markup()

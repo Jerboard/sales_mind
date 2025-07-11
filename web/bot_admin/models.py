@@ -208,7 +208,6 @@ class LogsUser(models.Model):
 
 
     def get_unique_users(self, period: str = None) -> int:
-        logger.warning(f'period: {period}')
         """
         period: 'day', 'week' или 'month'
         """
@@ -325,3 +324,9 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.user} — {self.amount} ₽"
+
+    @classmethod
+    def get_unique_users(cls) -> int:
+        return cls.objects.values('user').distinct().count()
+
+
