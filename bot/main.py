@@ -18,10 +18,7 @@ from middlewares import OneBigBeautifulMiddleware
 dp = Dispatcher()
 dp.message.middleware(OneBigBeautifulMiddleware())
 dp.callback_query.middleware(OneBigBeautifulMiddleware())
-#
-# dp.message.middleware(SessionMiddleware())
-# dp.callback_query.middleware(SessionMiddleware())
-# dp.errors.middleware(SessionMiddleware())
+dp.errors.middleware(OneBigBeautifulMiddleware())
 
 
 async def main() -> None:
