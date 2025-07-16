@@ -5,3 +5,5 @@ openai
 uvloop
 bleach
 redis
+yookassa
+celery

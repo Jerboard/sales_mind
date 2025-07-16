@@ -1,6 +1,10 @@
 from pathlib import Path
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.redis import RedisJobStore
+from apscheduler.executors.pool import ThreadPoolExecutor
 
 import os
+import telebot
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -15,10 +19,37 @@ DEFAULT_SUPERUSER_USERNAME = os.getenv('DJANGO_USER')
 DEFAULT_SUPERUSER_PASSWORD = os.getenv('DJANGO_PASS')
 DEFAULT_SUPERUSER_EMAIL = 'webmaster@localhost'
 
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
+
 if DEBUG:
     TOKEN_BOT = os.getenv('TOKEN_TEST')
 else:
     TOKEN_BOT = os.getenv('TOKEN')
+
+    CSRF_TRUSTED_ORIGINS = [
+        'https://dns381388.hostline.su',
+        'https://www.dns381388.hostline.su',
+    ]
+
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+bot = telebot.TeleBot(TOKEN_BOT, parse_mode='html')
+# Настройка планировщика
+jobstores = {
+    'default': RedisJobStore(host=REDIS_HOST, port=REDIS_PORT, db=1)
+}
+executors = {
+    'default': ThreadPoolExecutor(10)
+}
+job_defaults = {
+    'coalesce': True,
+    'max_instances': 3
+}
+
+scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
+scheduler.start()
 
 ALLOWED_HOSTS = ['*']
 
@@ -31,7 +62,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'bot_admin'
+    'bot_admin',
+    'reminders',
 ]
 
 MIDDLEWARE = [

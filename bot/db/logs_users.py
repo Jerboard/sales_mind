@@ -18,7 +18,7 @@ class LogsUser(Base):
     msg_id: Mapped[int] = mapped_column(sa.ForeignKey("messages.id"), nullable=True)
 
     @classmethod
-    async def add(cls, user_id: int, action: str, session: str, comment: str = None, msg_id: int = None) -> None:
+    async def add(cls, user_id: int, action: str, session: str = None, comment: str = None, msg_id: int = None) -> None:
         query = sa.insert(cls).values(user_id=user_id, action=action, session=session)
 
         if comment:

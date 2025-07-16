@@ -15,7 +15,6 @@ async def com_start(msg: Message, state: FSMContext, session_id: str):
     await state.clear()
 
     await db.User.add(msg.from_user.id, msg.from_user.full_name, msg.from_user.username)
-
     user = await db.User.get_by_id(msg.from_user.id)
 
     # если принял правила то на главную, если нет то принимать
@@ -82,10 +81,10 @@ async def gpt_start_msg(msg: Message, state: FSMContext, session_id: str, user: 
 
 
 @main_router.message(Command(MenuCommand.PRICE.command))
-async def pay_start_msg(msg: Message, state: FSMContext, session_id: str):
+async def pay_start_msg(msg: Message, state: FSMContext, session_id: str, user: db.User):
     await state.clear()
 
-    await ut.send_payment_start(user_id=msg.from_user.id)
+    await ut.send_payment_start(user_id=msg.from_user.id, user=user)
 
     # сохраняем действия пользователя
     await db.LogsUser.add(

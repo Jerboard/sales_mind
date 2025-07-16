@@ -13,8 +13,9 @@ class Tariff(Base):
     description: Mapped[str] = mapped_column(sa.Text)
     price: Mapped[float] = mapped_column(sa.Numeric(10, 2))
     duration: Mapped[int] = mapped_column(sa.Integer)
-    response_count: Mapped[int] = mapped_column(sa.Integer)
+    response_count: Mapped[int] = mapped_column(sa.Integer, default=0)
     is_active: Mapped[bool] = mapped_column(sa.Boolean, default=True)
+    is_unlimited: Mapped[bool] = mapped_column(sa.Boolean, default=False)
 
     ordering: Mapped[int] = mapped_column(sa.Integer, default=1)
 

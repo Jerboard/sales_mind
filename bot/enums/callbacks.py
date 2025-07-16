@@ -12,6 +12,7 @@ class CB(Enum):
 
     PAYMENT_START = 'payment_start'
     PAYMENT_TARIFF = 'payment_tariff'
+    PAYMENT_REQUESTS = 'payment_requests'
 
     GPT_START = 'gpt_start'
     GPT_CATEGORY = 'gpt_category'

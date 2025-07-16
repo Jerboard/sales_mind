@@ -1,11 +1,12 @@
 from django.db import models
 from django.utils.safestring import mark_safe
 from datetime import datetime, timedelta
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 
 import logging
+import typing as t
 
-from enums import HANDLER_KEY_CHOICES, HANDLER_KEY_DICT
+from enums import HANDLER_KEY_CHOICES, HANDLER_KEY_DICT, PayType, PAY_TYPE_CHOICES
 
 
 logger = logging.getLogger(__name__)
@@ -26,10 +27,15 @@ class User(models.Model):
     id = models.BigAutoField(primary_key=True, verbose_name="ID")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Первый визит")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Последний визит")
+
     full_name = models.CharField(max_length=255, verbose_name="Полное имя")
     username = models.CharField(max_length=255, null=True, blank=True, verbose_name="Username")
+    email = models.CharField(max_length=255, null=True, blank=True, verbose_name="email")
+
     subscription_end = models.DateTimeField(null=True, blank=True, verbose_name="Окончание подписки")
     requests_remaining = models.IntegerField(default=0, verbose_name="Осталось запросов")
+    tariff = models.ForeignKey("Tariff", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Тариф")
+
     is_accepted = models.BooleanField(verbose_name="Принял правила", default=False)
     is_ban = models.BooleanField(verbose_name="Заблокирован", default=False)
     is_used_trial = models.BooleanField(verbose_name="Использовал пробный", default=False)
@@ -42,6 +48,26 @@ class User(models.Model):
 
     def __str__(self):
         return f'{self.full_name}'
+
+    @classmethod
+    def update(
+            cls, user_id: int, add_requests: int = None, subscription_end: datetime = None, tariff_id: int = None
+    ) -> None:
+        updates = {}
+        if add_requests:
+            updates['requests_remaining'] = F('requests_remaining') + add_requests
+        if subscription_end:
+            updates['subscription_end'] = subscription_end
+        if tariff_id:
+            updates['tariff_id'] = tariff_id
+
+        # Выполняем единый UPDATE в базе
+        cls.objects.filter(id=user_id).update(**updates)
+
+
+    @classmethod
+    def get_user(cls, user_id: int) -> t.Self:
+        return cls.objects.filter(id=user_id).first()
 
 
 # Логи ошибок
@@ -160,6 +186,7 @@ class Tariff(models.Model):
     duration = models.IntegerField(verbose_name="Продолжительность в днях", default=0)
     response_count = models.IntegerField(verbose_name="Количество запросов", default=0)
     is_active = models.BooleanField(default=True, verbose_name="Активна")
+    is_unlimited = models.BooleanField(default=False, verbose_name="Безлимитный тариф")
     ordering = models.IntegerField(verbose_name="Сортировка", default=1)
 
     class Meta:
@@ -169,6 +196,33 @@ class Tariff(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
+    @classmethod
+    def get_by_id(cls, tariff_id: int) -> t.Self:
+        return cls.objects.filter(id=tariff_id).first()
+
+
+class Request(models.Model):
+    id = models.BigAutoField(primary_key=True, verbose_name="ID")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создана")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлена")
+
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость",)
+    response_count = models.IntegerField(verbose_name="Количество запросов", default=0)
+    is_active = models.BooleanField(default=True, verbose_name="Активна")
+    ordering = models.IntegerField(verbose_name="Сортировка", default=1)
+
+    class Meta:
+        db_table = "requests"
+        verbose_name = "Запрос докупить"
+        verbose_name_plural = "Запросы докупить"
+
+    def __str__(self):
+        return f'{self.price}'
+
+    @classmethod
+    def get_by_id(cls, request_id: int) -> t.Self:
+        return cls.objects.filter(id=request_id).first()
 
 
 class Info(models.Model):
@@ -206,6 +260,25 @@ class LogsUser(models.Model):
     def __str__(self):
         return f"{self.user} — {self.action}"
 
+    @classmethod
+    def add(cls,
+            user_id: int,
+            action: str,
+            session: str = None,
+            comment: str = None,
+            msg_id: int = None) -> t.Self:
+        data = {
+            "user_id": user_id,
+            "action": action,
+        }
+        if session:
+            data["session"] = session
+        if comment:
+            data["comment"] = comment
+        if msg_id:
+            data["msg_id"] = msg_id
+
+        return cls.objects.create(**data)
 
     def get_unique_users(self, period: str = None) -> int:
         """
@@ -307,6 +380,10 @@ class Text(models.Model):
     def __str__(self):
         return f'{self.key}'
 
+    @classmethod
+    def get_by_key(cls, key: str) -> t.Self:
+        return cls.objects.filter(key=key).first()
+
 
 class Payment(models.Model):
     id = models.BigAutoField(primary_key=True, verbose_name="ID")
@@ -316,6 +393,9 @@ class Payment(models.Model):
     tariff = models.ForeignKey("Tariff", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Тариф")
     amount = models.FloatField(verbose_name="Сумма")
     payment_id = models.CharField(max_length=255, verbose_name="ID платежа")
+    payment_type = models.CharField(
+        max_length=255, verbose_name="Тип платежа", default=PayType.TARIFF.value, choices=PAY_TYPE_CHOICES
+    )
 
     class Meta:
         db_table = "payments"
@@ -326,7 +406,32 @@ class Payment(models.Model):
         return f"{self.user} — {self.amount} ₽"
 
     @classmethod
+    def add(cls, user_id: int, tariff_id: int, amount: float, payment_id: str, payment_type: str) -> None:
+        return cls.objects.create(
+            user_id=user_id,
+            tariff_id=tariff_id,
+            amount=amount,
+            payment_id=payment_id,
+            payment_type=payment_type,
+        )
+
+    @classmethod
     def get_unique_users(cls) -> int:
         return cls.objects.values('user').distinct().count()
 
+
+class DisallowCategory(models.Model):
+    id = models.BigAutoField(primary_key=True, verbose_name="ID")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
+    category = models.ForeignKey("PromptCategory", on_delete=models.CASCADE, verbose_name="Категория")
+    tariff = models.ForeignKey("Tariff", on_delete=models.CASCADE, verbose_name="Тариф")
+
+    class Meta:
+        db_table = "disallow_categories"
+        verbose_name = "Запрещённый сценарий"
+        verbose_name_plural = "Запрещённые сценарии"
+
+    def __str__(self):
+        return f"{self.category} — {self.tariff}"
 

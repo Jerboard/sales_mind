@@ -6,3 +6,8 @@ pytelegrambotapi
 psycopg2
 pytz
 requests
+celery
+redis
+yookassa
+pytelegrambotapi
+apscheduler

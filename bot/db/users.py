@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from sqlalchemy.dialects import postgresql as psql
 
@@ -16,12 +17,17 @@ class User(Base):
 
     full_name: Mapped[str] = mapped_column(sa.String)
     username: Mapped[str] = mapped_column(sa.String, nullable=True)
+    email: Mapped[str] = mapped_column(sa.String, nullable=True)
+
     subscription_end: Mapped[datetime] = mapped_column(sa.DateTime, nullable=True)
     requests_remaining: Mapped[int] = mapped_column(sa.Integer, default=0)
+    tariff_id: Mapped[int] = mapped_column(sa.ForeignKey("tariffs.id"), nullable=True)
 
     is_accepted: Mapped[bool] = mapped_column(sa.Boolean, default=False)
     is_ban: Mapped[bool] = mapped_column(sa.Boolean, default=False)
     is_used_trial: Mapped[bool] = mapped_column(sa.Boolean, default=False)
+
+    tariff: Mapped["Tariff"] = relationship("Tariff", backref="user")
 
     def subscription_end_str(self):
         return self.subscription_end.strftime(conf.datetime_format)
@@ -57,6 +63,7 @@ class User(Base):
             subscription_end: datetime = None,
             is_accepted: bool = None,
             is_used_trial: bool = None,
+            email: str = None,
     ) -> None:
         """Обновляет данные"""
         now = datetime.now()
@@ -68,6 +75,9 @@ class User(Base):
         if subscription_end:
             query = query.values(subscription_end=subscription_end)
 
+        if email:
+            query = query.values(email=email)
+
         if is_accepted is not None:
             query = query.values(is_accepted=is_accepted)
 
@@ -77,3 +87,5 @@ class User(Base):
         async with begin_connection() as conn:
             await conn.execute(query)
             await conn.commit()
+
+

@@ -22,7 +22,7 @@ dp.errors.middleware(OneBigBeautifulMiddleware())
 
 
 async def main() -> None:
-    # await init_models()
+    await db.Text.add_new_texts_on_start()
     await set_main_menu()
 
     dp.include_router(main_router)

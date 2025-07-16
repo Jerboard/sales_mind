@@ -2,7 +2,9 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
-from .models import User, LogsError, PromptCategory, Prompt, Message, Tariff, Info, LogsUser, Text, Payment
+from .models import (
+    User, LogsError, PromptCategory, Prompt, Message, Tariff, Info, LogsUser, Text, Payment, DisallowCategory, Request
+)
 from web.settings import DEBUG
 
 
@@ -12,6 +14,14 @@ class PromptInline(TabularInline):
     extra = 0
     fields = ("name", "model", "hint", "role", "prompt", "is_active")
     show_change_link = True            # клик → полноценная форма Prompt
+    ordering = ("-updated_at",)
+
+
+class DisallowInline(TabularInline):
+    model = DisallowCategory
+    extra = 0
+    fields = ("category",)
+    show_change_link = True
     ordering = ("-updated_at",)
 
 
@@ -37,7 +47,7 @@ class LogsErrorAdmin(ModelAdmin):
 
 @admin.register(PromptCategory)
 class PromptCategoryAdmin(ModelAdmin):
-    list_display = ("name", "is_active", "ordering", "created_at", "updated_at")
+    list_display = ("id", "name", "is_active", "ordering", "created_at", "updated_at")
     list_editable = ("is_active", "ordering")
     search_fields = ("name",)
     list_filter = ("is_active",)
@@ -68,10 +78,19 @@ class MessageAdmin(ModelAdmin):
 
 @admin.register(Tariff)
 class TariffAdmin(ModelAdmin):
-    list_display = ("id", "name", "description", "price", "is_active", "ordering", "updated_at")
-    list_editable = ("name", "description", "price", "is_active", "ordering")
+    list_display = ("id", "name", "description", "price", "is_unlimited", "is_active", "ordering", "updated_at")
+    list_editable = ("description", "price", "is_unlimited", "is_active", "ordering")
     list_filter = ("is_active",)
     search_fields = ("name", "description")
+    readonly_fields = ("created_at", "updated_at")
+    ordering = ("ordering",)
+    inlines = (DisallowInline,)
+
+
+@admin.register(Request)
+class TariffAdmin(ModelAdmin):
+    list_display = ("id", "response_count", "price", "is_active", "ordering", "updated_at")
+    list_editable = ("response_count", "price", "is_active", "ordering")
     readonly_fields = ("created_at", "updated_at")
     ordering = ("ordering",)
 

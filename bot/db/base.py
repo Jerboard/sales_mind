@@ -55,3 +55,17 @@ class Base(DeclarativeBase):
             result = await conn.execute(query)
 
         return result.scalars().first()
+
+    @classmethod
+    async def get_by_id_celery(cls, session: AsyncSession, entry_id: int) -> t.Optional[t.Self]:
+        """Возвращает строку по id"""
+
+        query = sa.select(cls).where(cls.id == entry_id)
+
+        result = await session.execute(query)
+        return result.scalars().first()
+
+        # async with session as conn:
+        #     result = await conn.execute(query)
+        #
+        # return result.scalars().first()

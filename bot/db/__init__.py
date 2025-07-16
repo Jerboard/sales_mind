@@ -8,3 +8,5 @@ from .logs_error import LogsError
 from .logs_users import LogsUser
 from .texts import Text
 from .payments import Payment
+from .disallow_categories import DisallowCategory
+from .requests import Request

@@ -40,7 +40,6 @@ async def free_msg_hnd(msg: Message, user: db.User, session_id: str):
     )
 
 
-
 # проверяет подписку, в случае удачи пропускает
 @error_router.callback_query()
 async def free_cb_hnd(cb: CallbackQuery):

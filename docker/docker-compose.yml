@@ -34,6 +34,16 @@ services:
       - .env
 
 
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: redisinsight_sm
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    env_file:
+      - .env
+
+
   nginx:
     image: nginx:latest
     container_name: nginx_sales_mind
@@ -76,6 +86,7 @@ services:
       args:
         - --no-cache
     container_name: bot_sales_mind
+    command: python main.py
     volumes:
       - ../bot:/app
       - ../logs/bot:/app/logs
@@ -85,8 +96,28 @@ services:
     env_file:
       - .env
 
+  certbot:
+    image: certbot/certbot
+    container_name: certbot_bcx
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+
+  certbot-renew:
+    image: certbot/certbot
+    container_name: certbot_renew_bcx
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+      - ../logs/certbot:/var/log/letsencrypt
+    entrypoint: sh -c
+    command: >
+      "trap exit TERM; while :; do certbot renew --quiet >> /var/log/letsencrypt/renew.log 2>&1; sleep 12h & wait $${!}; done;"
+    restart: unless-stopped
+
 
 volumes:
   pgadmin_data:
+#  redislabs_data:
   redis_data:
     driver: local

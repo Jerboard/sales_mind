@@ -108,12 +108,12 @@ async def gpt_prompt(cb: CallbackQuery, state: FSMContext, session_id: str, user
 
 # сам запрос
 @client_router.message(StateFilter(CB.GPT_PROMPT.value))
-async def gpt_prompt_msg(msg: Message, state: FSMContext, session_id: str):
+async def gpt_prompt_msg(msg: Message, state: FSMContext, session_id: str, user: db.User):
     t0 = time.perf_counter()
     data = await state.get_data()
 
     message_id = await ut.send_gpt_answer(
-        user_id=msg.from_user.id,
+        user=user,
         user_prompt=msg.text,
         prompt_id=data.get('prompt_id')
     )
@@ -130,7 +130,7 @@ async def gpt_prompt_msg(msg: Message, state: FSMContext, session_id: str):
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_REPEAT.value))
-async def gpt_repeat(cb: CallbackQuery, state: FSMContext, session_id: str):
+async def gpt_repeat(cb: CallbackQuery, state: FSMContext, session_id: str, user: db.User):
     t0 = time.perf_counter()
 
     _, answer_id_str = cb.data.split(':')
@@ -140,7 +140,7 @@ async def gpt_repeat(cb: CallbackQuery, state: FSMContext, session_id: str):
     prompt = 'Предложи ещё варианты по предидущему запросу'
 
     message_id = await ut.send_gpt_answer(
-        user_id=cb.from_user.id,
+        user=user,
         user_prompt=prompt,
         prompt_id=answer.prompt_id
     )
@@ -153,7 +153,6 @@ async def gpt_repeat(cb: CallbackQuery, state: FSMContext, session_id: str):
         session=session_id
     )
     logger.warning(f'{message_id}: {time.perf_counter() - t0:.2f} repeat')
-
 
 
 @client_router.callback_query(lambda cb: cb.data.startswith(CB.GPT_RATE.value))

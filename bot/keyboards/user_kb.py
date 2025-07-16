@@ -2,7 +2,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
 import db
 from settings import conf
-from enums import CB, Action
+from enums import CB, Action, PayType
 
 
 # Кнопки подписаться на канал
@@ -32,9 +32,11 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
 
 
 # Выбор категории
-def get_prompt_categories_kb(categories: list[db.PromptCategory]) -> InlineKeyboardMarkup:
+def get_prompt_categories_kb(categories: list[db.PromptCategory], disallow: list[int]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     for category in categories:
+        if category.id in disallow:
+            continue
         kb.button(text=category.name, callback_data=f'{CB.GPT_CATEGORY.value}:{category.id}')
     kb.button(text='🔙 Назад', callback_data=f'{CB.COM_START.value}')
     return kb.adjust(1).as_markup()
@@ -61,15 +63,32 @@ def get_new_query_kb(message_id: int) -> InlineKeyboardMarkup:
 
 
 # Основные тарифы
-def get_payment_kb(tariffs: list[db.Tariff]) -> InlineKeyboardMarkup:
+def get_payment_kb(tariffs: list[db.Tariff], with_requests: bool) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
+    if with_requests:
+        kb.button(text='Докупить запросы', callback_data=f'{CB.PAYMENT_REQUESTS.value}')
+
     for tariff in tariffs:
-        kb.button(text=tariff.name, callback_data=f'{CB.PAYMENT_TARIFF.value}:{tariff.id}')
+        kb.button(text=tariff.name, callback_data=f'{CB.PAYMENT_TARIFF.value}:{PayType.TARIFF.value}:{tariff.id}')
 
     kb.button(text='🎁 Попробовать', callback_data=f'{CB.PAYMENT_TARIFF.value}:0')
     kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
 
     return kb.adjust(1).as_markup()
+
+
+# Основные тарифы
+def get_requests_kb(requests: list[db.Request]) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    for request in requests:
+        kb.button(
+            text=f'{request.response_count} - {request.price} р.',
+            callback_data=f'{CB.PAYMENT_TARIFF.value}:{PayType.REQUEST.value}:{request.id}'
+        )
+
+    kb.button(text='⬅️ Назад', callback_data=f'{CB.PAYMENT_START.value}')
+
+    return kb.adjust(3).as_markup()
 
 
 # Инфо кнопки
@@ -94,5 +113,14 @@ def get_success_pay_kb() -> InlineKeyboardMarkup:
 def get_start_payment_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text='💳 Тарифы и доступ', callback_data=f'{CB.PAYMENT_START.value}')
+
+    return kb.adjust(1).as_markup()
+
+
+# Инфо кнопки
+def get_payment_url_kb(pay_url: str) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text='💳 Перейти к оплате', url=pay_url)
+    kb.button(text='🔙 Назад', callback_data=f'{CB.PAYMENT_START.value}')
 
     return kb.adjust(1).as_markup()

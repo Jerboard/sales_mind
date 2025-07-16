@@ -1,15 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime, date, time
-from sqlalchemy.dialects import postgresql as psql
 
 import sqlalchemy as sa
 import typing as t
 
 from .base import Base, begin_connection
-
-
-import sqlalchemy as sa
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class Payment(Base):
@@ -47,3 +41,17 @@ class Payment(Base):
             result = await conn.execute(query)
             await conn.commit()
         return result.inserted_primary_key[0]
+
+    @classmethod
+    async def get_last_for_user(cls, user_id: int) -> t.Optional[t.Self]:
+        query = (
+            sa.select(cls)
+            .where(cls.user_id == user_id)
+            .order_by(sa.desc(cls.created_at))
+            .limit(1)
+        )
+
+        async with begin_connection() as conn:
+            result = await conn.execute(query)
+
+        return result.scalars().first()
