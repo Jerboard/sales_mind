@@ -34,14 +34,14 @@ services:
       - .env
 
 
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    container_name: redisinsight_sm
-    ports:
-      - "8001:8001"
-    restart: unless-stopped
-    env_file:
-      - .env
+#  redisinsight:
+#    image: redislabs/redisinsight:latest
+#    container_name: redisinsight_sm
+#    ports:
+#      - "8001:8001"
+#    restart: unless-stopped
+#    env_file:
+#      - .env
 
 
   nginx:
