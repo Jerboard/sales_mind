@@ -88,4 +88,10 @@ class User(Base):
             await conn.execute(query)
             await conn.commit()
 
+    @classmethod
+    async def get_full_user(cls, user_id: int) -> sa.select:
+        query = sa.select(cls).options(joinedload(cls.tariff)).where(cls.id == user_id)
+        async with begin_connection() as conn:
+            result = await conn.execute(query)
 
+        return result.scalars().first()

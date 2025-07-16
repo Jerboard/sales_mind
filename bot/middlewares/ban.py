@@ -71,8 +71,4 @@ class OneBigBeautifulMiddleware(BaseMiddleware):
 
                 return
 
-
-
         return await handler(event, data)
-
-
