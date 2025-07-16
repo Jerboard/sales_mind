@@ -57,6 +57,8 @@ services:
       - ../web/staticfiles:/var/html/staticfiles/
       - ../web/media:/var/html/media/
       - ../logs/nginx:/var/log/nginx
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
     restart: unless-stopped
     depends_on:
       - web
