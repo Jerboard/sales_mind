@@ -136,6 +136,7 @@ async def send_balance_start(user: db.User, msg_id: int = None):
 
 
 async def create_pay_link(user: db.User, tariff_id: int, pay_type: str, session_id: str, msg_id: int = None):
+    print(f'user.email: {user.email}')
     try:
         if pay_type == PayType.TARIFF.value:
             tariff = await db.Tariff.get_by_id(tariff_id)
@@ -146,7 +147,8 @@ async def create_pay_link(user: db.User, tariff_id: int, pay_type: str, session_
                 email=user.email,
                 amount=tariff.price,
                 description=tariff.name,
-                pay_type=pay_type
+                pay_type=pay_type,
+                session_id=session_id
             )
 
             confirmation_url = invoice.confirmation.confirmation_url
@@ -162,7 +164,8 @@ async def create_pay_link(user: db.User, tariff_id: int, pay_type: str, session_
                 email=user.email,
                 amount=request.price,
                 description=f'Покупка запросов {request.response_count}',
-                pay_type=pay_type
+                pay_type=pay_type,
+                session_id=session_id
             )
 
             confirmation_url = invoice.confirmation.confirmation_url

@@ -83,11 +83,13 @@ async def payment_requests(cb: CallbackQuery, state: FSMContext, session_id: str
 
 
 @client_router.message(StateFilter(HandlerKey.PAYMENT_URL_EMAIL.key))
-async def payment_url_email(msg: Message, state: FSMContext, session_id: str, user: db.User):
+async def payment_url_email(msg: Message, state: FSMContext, session_id: str):
     if msg.entities and msg.entities[0].type == MessageEntityType.EMAIL.value:
         await db.User.update(user_id=msg.from_user.id, email=msg.text)
         data = await state.get_data()
         await state.clear()
+
+        user = await db.User.get_full_user(msg.from_user.id)
         await ut.create_pay_link(
             user=user,
             tariff_id=data.get('tariff_id'),

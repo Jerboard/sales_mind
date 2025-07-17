@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import db
 import keyboards as kb
 import utils as ut
-from enums import HandlerKey
+from enums import HandlerKey, CB
 
 
 # проверяет блокированных пользователей
@@ -50,7 +50,7 @@ class OneBigBeautifulMiddleware(BaseMiddleware):
             is_unlimited_tariff = user.tariff.is_unlimited if user.tariff else False
             requests_remaining = user.requests_remaining if not is_unlimited_tariff else 1
             if (
-                    (cb.startswith('gpt_') or current_state)
+                    (cb.startswith('gpt_') or current_state == CB.GPT_PROMPT.value)
                     and
                     (requests_remaining == 0 or user.subscription_end < datetime.now(timezone.utc))
             ):
