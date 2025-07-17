@@ -86,7 +86,7 @@ class YooKassaWebhookView(APIView):
                         tariff_id=tariff_id
                     )
 
-                    subscription_end = datetime.now(timezone.utc)
+                    # subscription_end = datetime.now(timezone.utc)
                     scheduler.add_job(
                         func=ut.send_notice,
                         args=[user_id, HandlerKey.SEND_NOTICE_1.key],

@@ -2,7 +2,8 @@ import requests
 
 
 def test_payments():
-    url = "http://localhost:8000/api/payment"
+    # url = "http://localhost:8000/api/payment"
+    url = "http://salesmindpayments.ru/api/payment"
     payload = {
         "type": "notification",
         "event": "payment.succeeded",
