@@ -26,8 +26,8 @@ async def send_main_menu(user: db.User = None, user_id: int = None, msg_id: int 
 # старт запроса к гпт
 async def send_gpt_start(user: db.User, msg_id: int = None):
     categories = await db.PromptCategory.get_all()
-    last_payment = await db.Payment.get_last_for_user(user.id)
-    disallow = await db.DisallowCategory.get_disallow_list(last_payment.tariff_id)
+    # last_payment = await db.Payment.get_last_for_user(user.id)
+    disallow = await db.DisallowCategory.get_disallow_list(user.tariff_id)
     text = await db.Text.get_text(HandlerKey.GPT_START_MSG.key)
 
     text = text.format(
