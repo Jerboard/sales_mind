@@ -47,6 +47,7 @@ async def send_gpt_answer(
         user: db.User,
         user_prompt: str,
         prompt_id: int,
+        state: FSMContext,
 ):
 
     try:
@@ -81,6 +82,11 @@ async def send_gpt_answer(
 
         if user.tariff and not user.tariff.is_unlimited:
             await db.User.update(user_id=user.id, add_requests=-1)
+            if user.requests_remaining == 1:
+                await state.clear()
+                text = await db.Text.get_text(HandlerKey.GPT_REQUESTS_OUT.key)
+                await bot.send_message(chat_id=user.id, text=text, reply_markup=kb.get_start_payment_kb())
+
         return message_id
 
     except Exception as e:
@@ -125,7 +131,8 @@ async def send_balance_start(user: db.User, msg_id: int = None):
     text = await db.Text.get_text(HandlerKey.BALANCE_MSG.key)
     text = text.format(
         requests_remaining=user.requests_remaining,
-        subscription_end=user.subscription_end_str()
+        subscription_end=user.subscription_end_str(),
+        tariff=user.tariff.name
     )
 
     markup = kb.get_back_kb()
@@ -136,7 +143,6 @@ async def send_balance_start(user: db.User, msg_id: int = None):
 
 
 async def create_pay_link(user: db.User, tariff_id: int, pay_type: str, session_id: str, msg_id: int = None):
-    print(f'user.email: {user.email}')
     try:
         if pay_type == PayType.TARIFF.value:
             tariff = await db.Tariff.get_by_id(tariff_id)
@@ -193,24 +199,3 @@ async def create_pay_link(user: db.User, tariff_id: int, pay_type: str, session_
         comment=comment,
         session=session_id
     )
-
-
-async def send_success_payment(user_id: int, successful_payment: SuccessfulPayment = None, tariff_id: int = None):
-    tariff = await db.Tariff.get_by_id(tariff_id) if tariff_id else None
-
-    await db.Payment.add(
-        user_id=user_id,
-        tariff_id=tariff_id,
-        payment_id=successful_payment.provider_payment_charge_id if successful_payment else 'trial',
-        amount=successful_payment.total_amount / 100 if successful_payment else 0,
-    )
-
-    response_count = tariff.response_count if tariff_id else 5
-    duration = tariff.duration if tariff else 3
-    subscription_end = datetime.now() + timedelta(days=duration)
-    await db.User.update(
-        user_id=user_id, add_requests=response_count, subscription_end=subscription_end
-    )
-
-    text = await db.Text.get_text(HandlerKey.PAYMENT_SUCCESS.key)
-    await bot.send_message(chat_id=user_id, text=text, reply_markup=kb.get_success_pay_kb())

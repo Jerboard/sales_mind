@@ -51,16 +51,17 @@ class User(models.Model):
 
     @classmethod
     def update(
-            cls, user_id: int, add_requests: int = None, subscription_end: datetime = None, tariff_id: int = None
+            cls, user_id: int, requests: int = None, subscription_end: datetime = None, tariff_id: int = None
     ) -> None:
         updates = {}
-        if add_requests:
-            updates['requests_remaining'] = F('requests_remaining') + add_requests
+        if requests:
+            updates['requests_remaining'] = requests
         if subscription_end:
             updates['subscription_end'] = subscription_end
         if tariff_id:
             updates['tariff_id'] = tariff_id
 
+        logger.warning(updates)
         # Выполняем единый UPDATE в базе
         cls.objects.filter(id=user_id).update(**updates)
 

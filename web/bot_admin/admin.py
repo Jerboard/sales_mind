@@ -78,8 +78,10 @@ class MessageAdmin(ModelAdmin):
 
 @admin.register(Tariff)
 class TariffAdmin(ModelAdmin):
-    list_display = ("id", "name", "description", "price", "is_unlimited", "is_active", "ordering", "updated_at")
-    list_editable = ("description", "price", "is_unlimited", "is_active", "ordering")
+    list_display = (
+        "id", "name", "price", "duration", "response_count", "is_unlimited", "is_active", "ordering", "updated_at"
+    )
+    list_editable = ("price", "duration",  "response_count",  "is_unlimited", "is_active", "ordering")
     list_filter = ("is_active",)
     search_fields = ("name", "description")
     readonly_fields = ("created_at", "updated_at")

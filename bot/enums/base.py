@@ -28,6 +28,7 @@ class Action(Enum):
 class PayType(Enum):
     TARIFF = 'tariff'
     REQUEST = 'request'
+    FREE = 'free'
 
 
 PAY_TYPE_CHOICES = (
@@ -55,6 +56,8 @@ class HandlerKey(Enum):
 
     GPT_REPEAT = ('gpt_repeat', 'Повтор запроса к гпт', False)
     GPT_RATE = ('gpt_rate', 'Поставил оценку', True)
+
+    GPT_REQUESTS_OUT = ('gpt_requests_out', 'Закончились запросы', True)
 
     PAY_START_MSG = ('pay_start_msg', 'Тарифы (команда)', True)
     PAY_START_CB = ('pay_start_cb', 'Тарифы (кнопка)', False)

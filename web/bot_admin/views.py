@@ -77,11 +77,22 @@ class YooKassaWebhookView(APIView):
 
                 if payment_type == PayType.TARIFF.value:
                     tariff = Tariff.get_by_id(tariff_id)
-                    subscription_end = (user.subscription_end + timedelta(days=tariff.duration)).replace(tzinfo=None)
+
+                    now = datetime.now(timezone.utc)
+                    logger.warning(f'user.subscription_end > now: {user.subscription_end > now}')
+                    if user.subscription_end > now:
+                        subscription_end = (user.subscription_end + timedelta(days=tariff.duration)).replace(tzinfo=None)
+                        add_requests = tariff.response_count + user.requests_remaining
+                        logger.warning(f'subscription_end: {subscription_end}')
+                        logger.warning(f'add_requests: {add_requests} {tariff.response_count} {user.requests_remaining}')
+
+                    else:
+                        subscription_end = (now + timedelta(days=tariff.duration)).replace(tzinfo=None)
+                        add_requests = tariff.response_count
 
                     User.update(
                         user_id=user_id,
-                        add_requests=tariff.response_count,
+                        requests=add_requests,
                         subscription_end=subscription_end,
                         tariff_id=tariff_id
                     )
@@ -107,7 +118,7 @@ class YooKassaWebhookView(APIView):
 
                 else:
                     tariff = Request.get_by_id(tariff_id)
-                    User.update(user_id=user_id, add_requests=tariff.response_count)
+                    User.update(user_id=user_id, requests=tariff.response_count + user.requests_remaining)
 
                 text = Text.get_by_key(HandlerKey.PAYMENT_SUCCESS.key)
                 bot.send_message(chat_id=user_id, text=text.text, reply_markup=ut.get_success_pay_kb())

@@ -115,7 +115,8 @@ async def gpt_prompt_msg(msg: Message, state: FSMContext, session_id: str, user:
     message_id = await ut.send_gpt_answer(
         user=user,
         user_prompt=msg.text,
-        prompt_id=data.get('prompt_id')
+        prompt_id=data.get('prompt_id'),
+        state=state
     )
 
     # сохраняем действия пользователя
@@ -142,7 +143,8 @@ async def gpt_repeat(cb: CallbackQuery, state: FSMContext, session_id: str, user
     message_id = await ut.send_gpt_answer(
         user=user,
         user_prompt=prompt,
-        prompt_id=answer.prompt_id
+        prompt_id=answer.prompt_id,
+        state=state
     )
 
     # сохраняем действия пользователя

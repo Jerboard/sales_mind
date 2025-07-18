@@ -2,7 +2,7 @@ from aiogram.types import Message, CallbackQuery, PreCheckoutQuery, LabeledPrice
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 from aiogram.enums.message_entity_type import MessageEntityType
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import json
 
@@ -31,7 +31,7 @@ async def payment_url(cb: CallbackQuery, state: FSMContext, session_id: str, use
     _, pay_type, tariff_id_str = cb.data.split(':')
     tariff_id = int(tariff_id_str)
 
-    if pay_type == PayType.TARIFF.value and tariff_id == 0:
+    if pay_type == PayType.FREE.value:
         if user.is_used_trial:
             text = await db.Text.get_text(HandlerKey.PAYMENT_TRY_USED_TRIAL.key)
             await cb.answer(text, show_alert=True)
@@ -39,10 +39,13 @@ async def payment_url(cb: CallbackQuery, state: FSMContext, session_id: str, use
             action = HandlerKey.PAYMENT_TRY_USED_TRIAL.key
 
         else:
-            await db.User.update(user_id=user.id, is_used_trial=True)
-            await ut.send_success_payment(
-                user_id=user.id,
+            subscription_end = datetime.now() + timedelta(days=3)
+            await db.User.update(
+                user_id=user.id, add_requests=5, subscription_end=subscription_end
             )
+            text = await db.Text.get_text(HandlerKey.PAYMENT_SUCCESS.key)
+            await cb.message.edit_text(text=text, reply_markup=kb.get_success_pay_kb())
+
             action = HandlerKey.PAYMENT_USE_TRIAL.key
 
     elif not user.email:

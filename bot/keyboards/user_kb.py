@@ -66,12 +66,12 @@ def get_new_query_kb(message_id: int) -> InlineKeyboardMarkup:
 def get_payment_kb(tariffs: list[db.Tariff], with_requests: bool) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     if with_requests:
-        kb.button(text='Докупить запросы', callback_data=f'{CB.PAYMENT_REQUESTS.value}')
+        kb.button(text='📦 Докупить запросы', callback_data=f'{CB.PAYMENT_REQUESTS.value}')
 
     for tariff in tariffs:
         kb.button(text=tariff.name, callback_data=f'{CB.PAYMENT_TARIFF.value}:{PayType.TARIFF.value}:{tariff.id}')
 
-    kb.button(text='🎁 Попробовать', callback_data=f'{CB.PAYMENT_TARIFF.value}:0')
+    kb.button(text='🎁 Попробовать', callback_data=f'{CB.PAYMENT_TARIFF.value}:{PayType.FREE.value}:0')
     kb.button(text='⬅️ Назад', callback_data=f'{CB.COM_START.value}')
 
     return kb.adjust(1).as_markup()
