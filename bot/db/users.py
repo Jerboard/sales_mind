@@ -29,8 +29,10 @@ class User(Base):
 
     tariff: Mapped["Tariff"] = relationship("Tariff", backref="user")
 
-    def subscription_end_str(self):
-        return self.subscription_end.strftime(conf.datetime_format)
+    def subscription_end_str(self) -> t.Optional[str]:
+        if self.subscription_end:
+            return self.subscription_end.strftime(conf.datetime_format)
+
 
     @classmethod
     async def add(cls, user_id: int, full_name: str, username: str) -> None:
