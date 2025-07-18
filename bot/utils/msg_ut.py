@@ -132,7 +132,7 @@ async def send_balance_start(user: db.User, msg_id: int = None):
     text = text.format(
         requests_remaining=user.requests_remaining,
         subscription_end=user.subscription_end_str(),
-        tariff=user.tariff.name
+        tariff=user.tariff.name if user.tariff else 'Нет'
     )
 
     markup = kb.get_back_kb()

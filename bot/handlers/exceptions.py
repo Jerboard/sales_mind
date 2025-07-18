@@ -10,7 +10,7 @@ from enums import HandlerKey
 
 if not conf.debug:
     @error_router.errors()
-    async def error_handler(ex: ErrorEvent, session_id: str):
+    async def error_handler(ex: ErrorEvent, session_id: str = None):
         tb, msg = log_error (ex)
         user_id = ex.update.message.from_user.id if ex.update.message else None
 
