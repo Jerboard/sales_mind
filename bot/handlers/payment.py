@@ -32,7 +32,7 @@ async def payment_url(cb: CallbackQuery, state: FSMContext, session_id: str, use
     tariff_id = int(tariff_id_str)
 
     if pay_type == PayType.FREE.value:
-        if user.is_used_trial:
+        if user.is_used_trial or user.tariff:
             text = await db.Text.get_text(HandlerKey.PAYMENT_TRY_USED_TRIAL.key)
             await cb.answer(text, show_alert=True)
 
@@ -41,7 +41,7 @@ async def payment_url(cb: CallbackQuery, state: FSMContext, session_id: str, use
         else:
             subscription_end = datetime.now() + timedelta(days=3)
             await db.User.update(
-                user_id=user.id, add_requests=5, subscription_end=subscription_end
+                user_id=user.id, add_requests=5, subscription_end=subscription_end, is_used_trial=True
             )
             text = await db.Text.get_text(HandlerKey.PAYMENT_SUCCESS.key)
             await cb.message.edit_text(text=text, reply_markup=kb.get_success_pay_kb())

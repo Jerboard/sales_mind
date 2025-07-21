@@ -107,8 +107,9 @@ async def send_payment_start(user_id: int, user: db.User, msg_id: int = None):
 
     is_has_tariff = True if user.tariff else False
     with_requests = True if is_has_tariff and not user.tariff.is_unlimited else False
+    with_trial = True if not is_has_tariff and not user.is_used_trial else False
 
-    markup = kb.get_payment_kb(tariffs, with_requests=with_requests)
+    markup = kb.get_payment_kb(tariffs, with_requests=with_requests, with_trial=with_trial)
     if msg_id:
         await bot.edit_message_text(chat_id=user_id, message_id=msg_id, text=text, reply_markup=markup)
     else:
