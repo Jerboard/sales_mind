@@ -18,6 +18,7 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(sa.String)
     username: Mapped[str] = mapped_column(sa.String, nullable=True)
     email: Mapped[str] = mapped_column(sa.String, nullable=True)
+    source: Mapped[str] = mapped_column(sa.String, nullable=True)
 
     subscription_end: Mapped[datetime] = mapped_column(sa.DateTime, nullable=True)
     requests_remaining: Mapped[int] = mapped_column(sa.Integer, default=0)
@@ -35,7 +36,7 @@ class User(Base):
 
 
     @classmethod
-    async def add(cls, user_id: int, full_name: str, username: str) -> None:
+    async def add(cls, user_id: int, full_name: str, username: str, source: str = None) -> None:
         """Добавляет новую запись в таблицу users"""
         now = datetime.now()
         query = (
@@ -46,6 +47,7 @@ class User(Base):
                 id=user_id,
                 full_name=full_name,
                 username=username,
+                source=source,
             ).on_conflict_do_update(
                 index_elements=[cls.id],
                 set_={"full_name": full_name, 'username': username, 'updated_at': now}

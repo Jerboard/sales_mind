@@ -14,7 +14,10 @@ from enums import CB, MenuCommand, Action, HandlerKey
 async def com_start(msg: Message, state: FSMContext, session_id: str):
     await state.clear()
 
-    await db.User.add(msg.from_user.id, msg.from_user.full_name, msg.from_user.username)
+    source = msg.text.split('=')[-1] if msg.text.split('=')[-1] != f'/{MenuCommand.START.command}' else None
+    print(source)
+
+    await db.User.add(msg.from_user.id, msg.from_user.full_name, msg.from_user.username, source=source)
     user = await db.User.get_by_id(msg.from_user.id)
 
     # если принял правила то на главную, если нет то принимать

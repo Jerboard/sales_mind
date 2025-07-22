@@ -36,6 +36,8 @@ class User(models.Model):
     requests_remaining = models.IntegerField(default=0, verbose_name="Осталось запросов")
     tariff = models.ForeignKey("Tariff", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Тариф")
 
+    source = models.CharField(max_length=255, null=True, blank=True, verbose_name="Источинк")
+
     is_accepted = models.BooleanField(verbose_name="Принял правила", default=False)
     is_ban = models.BooleanField(verbose_name="Заблокирован", default=False)
     is_used_trial = models.BooleanField(verbose_name="Использовал пробный", default=False)

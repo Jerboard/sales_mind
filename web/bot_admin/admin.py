@@ -28,10 +28,10 @@ class DisallowInline(TabularInline):
 # ────────── основные модели ──────────
 @admin.register(User)
 class UserAdmin(ModelAdmin):
-    list_display = ("id", "full_name", "username", "subscription_end", "is_ban", "created_at", "updated_at")
+    list_display = ("id", "full_name", "username", "subscription_end", "is_ban",  "source", "created_at", "updated_at")
     search_fields = ("full_name", "username")
     ordering = ("-updated_at",)
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "source")
     list_editable = ["is_ban"]
 
 
